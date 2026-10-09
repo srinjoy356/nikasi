@@ -13,3 +13,5 @@ cdk-outputs.json
 backend/vlm/models/
 web/dist.zip
 .alert-email
+web/.env.local
+web/.env
