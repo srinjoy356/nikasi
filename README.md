@@ -5,7 +5,7 @@
 Built solo for the WeMakeDevs x AWS *Environmental Hacks* (Heat and Water track), Oct 8-11, 2026.
 *Nikasi* (निकासी) is the Hindi word for drainage and outflow.
 
-**Live app:** https://main.d2gfp9oihzn5ah.amplifyapp.com &nbsp;|&nbsp; **Architecture:** [docs/architecture.md](docs/architecture.md) &nbsp;|&nbsp; **Demo script:** [docs/demo-script.md](docs/demo-script.md)
+**Live app:** https://main.d2gfp9oihzn5ah.amplifyapp.com &nbsp;|&nbsp; **Code:** https://github.com/srinjoy356/nikasi &nbsp;|&nbsp; **Architecture:** [docs/architecture.md](docs/architecture.md) &nbsp;|&nbsp; **Demo script:** [docs/demo-script.md](docs/demo-script.md)
 
 ## The problem
 

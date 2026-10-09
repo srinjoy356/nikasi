@@ -3,7 +3,7 @@
 *Paste into the Environmental Hacks submission form. Replace the bracketed links.*
 
 **Track:** Heat and Water (monsoon waterlogging) &nbsp;|&nbsp; **Team:** solo
-**Live app:** https://main.d2gfp9oihzn5ah.amplifyapp.com &nbsp;|&nbsp; **Repo:** [GITHUB URL] &nbsp;|&nbsp; **Video:** [YOUTUBE URL] &nbsp;|&nbsp; **Blog:** [BUILDER CENTER URL]
+**Live app:** https://main.d2gfp9oihzn5ah.amplifyapp.com &nbsp;|&nbsp; **Repo:** https://github.com/srinjoy356/nikasi &nbsp;|&nbsp; **Video:** [YOUTUBE URL] &nbsp;|&nbsp; **Blog:** [BUILDER CENTER URL]
 
 ## The problem
 

@@ -55,4 +55,4 @@ return a 2xx.
 Put Amazon Cognito in front of the officer and crew screens, and replace the simulated officer desk with a real
 ward's ticketing export. And fine-tune a vision model on labelled drain photos instead of describing them.
 
-Code: [GITHUB URL] &nbsp;|&nbsp; Live: https://main.d2gfp9oihzn5ah.amplifyapp.com
+Code: https://github.com/srinjoy356/nikasi &nbsp;|&nbsp; Live: https://main.d2gfp9oihzn5ah.amplifyapp.com
