@@ -5,6 +5,11 @@ import { TicketMap } from './MapView';
 import { Pill, Severity, Ticket } from './Ticket';
 import { TYPE, isOpen, riskColor } from './util';
 
+function fmtHours(h?: number | null) {
+  if (h === null || h === undefined) return '-';
+  return h < 1 ? `${Math.max(1, Math.round(h * 60))} min` : `${h.toFixed(1)} h`;
+}
+
 const CREWS = ['Ward crew A', 'Ward crew B', 'Jet-vac team'];
 
 export function OfficerPage() {
@@ -44,7 +49,7 @@ export function OfficerPage() {
         <div><b>{stats?.open ?? '-'}</b><span>open</span></div>
         <div><b>{stats?.verified ?? '-'}</b><span>fixed and verified</span></div>
         <div><b>{stats?.escalated ?? '-'}</b><span>escalated</span></div>
-        <div><b>{stats?.medianHoursToVerified ?? '-'}</b><span>median hours to verified</span></div>
+        <div><b>{fmtHours(stats?.medianHoursToVerified)}</b><span>median time to verified</span></div>
       </div>
       {error ? <p className="error" role="alert">{error}</p> : null}
 

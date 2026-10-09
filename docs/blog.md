@@ -29,7 +29,7 @@ If anyone misses a deadline, the ticket escalates up four levels, from Junior En
 
 **Bedrock was blocked.** My new account answered every Bedrock call with "Operation not allowed". Instead of
 waiting, I ran an open-weight model myself: SmolVLM2-2.2B served by llama.cpp inside a Lambda container, using the
-AWS Lambda Web Adapter (a 4.5 GB image on 10 GB of memory).
+AWS Lambda Web Adapter (a 4.5 GB image on 3 GB of memory).
 
 **The small model was a bad judge and a good describer.** I measured it before building on it. Asked to score a drain
 as JSON, it gave nearly the same answer for every photo. Asked yes/no questions, it said "yes" to everything, even

@@ -61,7 +61,7 @@ export class NikasiStack extends cdk.Stack {
     const vlmFn = new lambda.DockerImageFunction(this, 'VisionModelFn', {
       code: lambda.DockerImageCode.fromImageAsset(path.join(__dirname, '../../backend/vlm'), { platform: Platform.LINUX_AMD64 }),
       architecture: lambda.Architecture.X86_64,
-      memorySize: 10240, timeout: cdk.Duration.minutes(5),
+      memorySize: 3008, timeout: cdk.Duration.minutes(5),
     });
     const vlmUrl = vlmFn.addFunctionUrl({ authType: lambda.FunctionUrlAuthType.AWS_IAM });
 

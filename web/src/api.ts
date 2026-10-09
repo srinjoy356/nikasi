@@ -27,8 +27,8 @@ export const createReport = (b: { reportId: string; photoKey: string; lat: numbe
   post<Report>('/reports', b);
 export const submitAfter = (id: string, b: { key: string; lat?: number; lng?: number }) => post<Report>(`/reports/${id}/after-photo`, b);
 
-/** Shrink a phone photo to ~720px JPEG so uploads work on slow networks. */
-export async function compress(file: File, max = 720): Promise<Blob> {
+/** Shrink a phone photo to ~512px JPEG so uploads work on slow networks. */
+export async function compress(file: File, max = 512): Promise<Blob> {
   const bmp = await createImageBitmap(file);
   const s = Math.min(1, max / Math.max(bmp.width, bmp.height));
   const c = document.createElement('canvas');

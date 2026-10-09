@@ -34,7 +34,7 @@ Python and a Step Functions state machine, not in a prompt.
 | Service | Role |
 |---|---|
 | AWS Step Functions | The ticket lifecycle with `waitForTaskToken`, timeouts that drive escalation, retries |
-| AWS Lambda | API, workflow tasks, and the vision model as a 4.5 GB container on 10 GB RAM |
+| AWS Lambda | API, workflow tasks, and the vision model as a 4.5 GB container on 3 GB RAM |
 | Amazon Rekognition | Second opinion on every photo |
 | Amazon Polly | Hindi and English morning brief (neural voice Kajal) |
 | Amazon DynamoDB, S3, API Gateway, EventBridge, SNS | Tickets and audit trail, photos by presigned upload, the API, keep-warm schedule, escalation emails |

@@ -37,7 +37,7 @@ state transition live in plain, tested Python and a Step Functions state machine
 | Service | Job in Nikasi | Where |
 |---|---|---|
 | **AWS Step Functions** | The ticket lifecycle: triage, wait for dispatch, wait for fix, verify, escalate, close. Uses `waitForTaskToken` so a person's click resumes it, and timeouts drive escalation | [infra/lib/nikasi-stack.ts](infra/lib/nikasi-stack.ts) |
-| **AWS Lambda** | The API, the workflow tasks, and the vision model (a 4.5 GB container, 10 GB RAM) | [backend/src/nikasi](backend/src/nikasi) |
+| **AWS Lambda** | The API, the workflow tasks, and the vision model (a 4.5 GB container, 3 GB RAM) | [backend/src/nikasi](backend/src/nikasi) |
 | **Amazon Rekognition** | Second opinion on every photo (labels such as Garbage, Pollution, Puddle, Drain) | `tasks.py` |
 | **Amazon Polly** | The Hindi and English morning brief for the officer (neural voice Kajal) | `api.py` |
 | **Amazon DynamoDB** | Tickets, timeline and audit trail | `store.py` |
@@ -64,7 +64,7 @@ llama.cpp inside a Lambda container. I measured it before building on it:
 
 So the model only writes the description, shown to the officer as "what the model sees". Code reads it for signals
 and cross-checks with Rekognition. If the model is cold or unavailable, triage falls back to Rekognition alone and
-says so in the ticket timeline. The first image on a cold model takes about 20 seconds at 720 px; the workflow is
+says so in the ticket timeline. The first image on a cold model takes about 20 seconds at 512 px; the workflow is
 asynchronous so nobody waits on it.
 
 ## Demo controls (clearly labelled in the UI)

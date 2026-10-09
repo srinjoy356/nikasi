@@ -21,7 +21,7 @@ s3 = boto3.client("s3")
 PROMPT = "Describe this photo in one sentence."
 
 
-def vlm_call(path, payload=None, timeout=100):
+def vlm_call(path, payload=None, timeout=170):
     """Signed call to the vision-model Lambda (function URL, IAM auth). payload=None means GET."""
     url = os.environ["VLM_URL"].rstrip("/") + path
     body = json.dumps(payload).encode() if payload is not None else None

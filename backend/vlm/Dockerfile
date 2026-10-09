@@ -5,8 +5,10 @@ FROM ghcr.io/ggml-org/llama.cpp:server
 
 COPY --from=adapter /lambda-adapter /opt/extensions/lambda-adapter
 
-ADD https://huggingface.co/ggml-org/SmolVLM2-2.2B-Instruct-GGUF/resolve/main/SmolVLM2-2.2B-Instruct-Q4_K_M.gguf /models/model.gguf
-ADD https://huggingface.co/ggml-org/SmolVLM2-2.2B-Instruct-GGUF/resolve/main/mmproj-SmolVLM2-2.2B-Instruct-Q8_0.gguf /models/mmproj.gguf
+ADD --chmod=0644 https://huggingface.co/ggml-org/SmolVLM2-2.2B-Instruct-GGUF/resolve/main/SmolVLM2-2.2B-Instruct-Q4_K_M.gguf /models/model.gguf
+ADD --chmod=0644 https://huggingface.co/ggml-org/SmolVLM2-2.2B-Instruct-GGUF/resolve/main/mmproj-SmolVLM2-2.2B-Instruct-Q8_0.gguf /models/mmproj.gguf
+
+RUN chmod 755 /models
 
 ENV AWS_LWA_PORT=8080 \
     AWS_LWA_READINESS_CHECK_PATH=/health \
@@ -15,4 +17,4 @@ ENV AWS_LWA_PORT=8080 \
 
 ENTRYPOINT ["/app/llama-server"]
 CMD ["-m", "/models/model.gguf", "--mmproj", "/models/mmproj.gguf", "--host", "0.0.0.0", "--port", "8080", \
-     "-c", "4096", "-t", "6", "--no-webui", "--no-warmup"]
+     "-c", "2048", "-t", "2", "--no-webui", "--no-warmup"]
