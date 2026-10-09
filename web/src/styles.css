@@ -98,6 +98,7 @@ input[type=text], input[type=number], input:not([type]), select { font: inherit;
 .pill.warn { background: var(--warn-soft); color: var(--warn); }
 .pill.ok { background: var(--ok-soft); color: var(--ok); }
 .pill.bad { background: var(--bad-soft); color: var(--bad); }
+.warnline { margin: 0; background: var(--warn-soft); color: var(--warn); padding: .5rem .8rem; border-radius: 10px; font-weight: 600; }
 .due { margin: 0; font-weight: 700; color: var(--warn); }
 .due.late { color: var(--bad); }
 .verify { border-radius: 12px; padding: .7rem .9rem; }

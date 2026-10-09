@@ -161,6 +161,10 @@ export class NikasiStack extends cdk.Stack {
       defaultIntegration: new integ.HttpLambdaIntegration('ApiIntegration', apiFn),
     });
 
+    // Throttle the public API so spam cannot run up the model bill.
+    const stage = api.defaultStage?.node.defaultChild as apigw.CfnStage;
+    stage.defaultRouteSettings = { throttlingBurstLimit: 20, throttlingRateLimit: 10 };
+
     // ---- the web app (HTTPS on Amplify so camera and GPS work on phones) ----
     const app = new amplify.CfnApp(this, 'WebApp', { name: 'nikasi', platform: 'WEB' });
     new amplify.CfnBranch(this, 'WebBranch', { appId: app.attrAppId, branchName: 'main', stage: 'PRODUCTION' });

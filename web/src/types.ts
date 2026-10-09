@@ -5,7 +5,7 @@ export interface Report {
   severity?: number; risk?: number; blockType?: string; rainMm?: number; rainSource?: string;
   clusterCount?: number; level: number; levelName: string; dueAt?: string; crew?: string;
   photoUrl?: string; afterUrl?: string; closedAt?: string;
-  assessment?: { summary?: string; sources?: { vlm: number | null; rekognition: number }; topLabels?: [string, number][] };
+  assessment?: { summary?: string; drainLikely?: boolean; sources?: { vlm: number | null; rekognition: number }; topLabels?: [string, number][] };
   verification?: { verified: boolean; checks: Record<string, Check> };
   timeline?: TimelineEvent[];
 }

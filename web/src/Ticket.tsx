@@ -49,6 +49,9 @@ export function Ticket({ r, children }: { r: Report; children?: React.ReactNode 
           <div><dt>Owner</dt><dd>{r.levelName}</dd></div>
         </dl>
       ) : null}
+      {r.assessment && r.assessment.drainLikely === false ? (
+        <p className="warnline" role="note">This photo may not show a drain. Check it before sending a crew.</p>
+      ) : null}
       {r.assessment?.summary ? <p className="reads"><b>What the model sees:</b> {r.assessment.summary}</p> : null}
       {waiting && r.dueAt ? (
         <p className={`due ${new Date(r.dueAt).getTime() < now ? 'late' : ''}`}>{timeLeft(r.dueAt, now)} before it escalates</p>

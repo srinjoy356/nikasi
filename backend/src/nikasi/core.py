@@ -91,6 +91,10 @@ _WATER = ("water", "puddle", "flood", "stagnant", "overflow", "sewage", "canal",
 _BLOCKED = ("block", "clog", "choke", "jam", "stuck", "overflow", "full of")
 
 
+_DRAIN_WORDS = ("drain", "gutter", "sewer", "manhole", "canal", "nala", "street", "road", "alley", "lane",
+                "pavement", "gully", "culvert", "ditch", "garbage", "puddle", "flood", "water", "river")
+
+
 def vlm_from_caption(text):
     """The vision model writes one plain sentence; we read it for signals.
     Small models are unreliable at scoring but good at describing, so code does the judging."""
@@ -117,6 +121,8 @@ def combine(rek, vlm):
         out["summary"] = vlm["summary"]
         out["standing"] = max(out["standing"], 0.8 if vlm["water"] else 0.0)
     out["blockScore"] = round((out["severity"] - 1) / 4.0, 3)
+    cap = ((vlm or {}).get("summary") or "").lower()
+    out["drainLikely"] = bool(rek.get("drainContext")) or out["severity"] >= 3 or any(w in cap for w in _DRAIN_WORDS)
     return out
 
 

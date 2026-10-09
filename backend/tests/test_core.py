@@ -107,3 +107,11 @@ def test_caption_reading():
     clean = core.vlm_from_caption("A clean paved street with a drain cover.")
     assert clean["severity"] == 1 and clean["blockage"] == "none"
     assert core.vlm_from_caption("") is None
+
+
+def test_flags_photos_that_do_not_look_like_a_drain():
+    nope = core.combine(core.assess(L(person=90)), core.vlm_from_caption("A mosaic of coloured blocks."))
+    assert nope["drainLikely"] is False
+    yes = core.combine(core.assess(L(drain=80)), core.vlm_from_caption("A wet street with a car."))
+    assert yes["drainLikely"] is True
+    assert core.combine(core.assess(L(person=90)), None)["drainLikely"] is False
