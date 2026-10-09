@@ -18,15 +18,7 @@ sns = boto3.client("sns")
 REGION = os.environ.get("AWS_REGION", "us-east-1")
 s3 = boto3.client("s3")
 
-PROMPT = ("You are a drainage inspector looking at a photo from a citizen. Judge only the street drain, gutter "
-          "or nala in the photo. Reply with JSON only: severity 1 to 5 (1 = clear and flowing, 3 = half blocked, "
-          "5 = fully blocked or overflowing), blockage one of plastic_litter, silt, debris, standing_water, none, "
-          "blocked true or false, water_standing true or false, summary one short plain sentence.")
-SCHEMA = {"type": "object", "properties": {
-    "severity": {"type": "integer", "minimum": 1, "maximum": 5},
-    "blockage": {"type": "string", "enum": ["plastic_litter", "silt", "debris", "standing_water", "none"]},
-    "blocked": {"type": "boolean"}, "water_standing": {"type": "boolean"}, "summary": {"type": "string"}},
-    "required": ["severity", "blockage", "blocked", "water_standing", "summary"]}
+PROMPT = "Describe this photo in one sentence."
 
 
 def vlm_call(path, payload=None, timeout=100):
@@ -42,7 +34,7 @@ def vlm_call(path, payload=None, timeout=100):
 
 
 def read_with_vlm(key):
-    """Ask the open-weight vision model. Returns a validated dict or None (never raises)."""
+    """Ask the open-weight vision model for a one-sentence description. Never raises: None if unavailable."""
     if not os.environ.get("VLM_URL"):
         return None
     try:
@@ -50,11 +42,10 @@ def read_with_vlm(key):
         mime = "image/png" if key.endswith(".png") else "image/jpeg"
         out = vlm_call("/v1/chat/completions", {
             "messages": [{"role": "user", "content": [
-                {"type": "text", "text": PROMPT},
-                {"type": "image_url", "image_url": {"url": "data:%s;base64,%s" % (mime, base64.b64encode(img).decode())}}]}],
-            "max_tokens": 200, "temperature": 0.1,
-            "response_format": {"type": "json_object", "schema": SCHEMA}})
-        return core.parse_vlm(out["choices"][0]["message"]["content"])
+                {"type": "image_url", "image_url": {"url": "data:%s;base64,%s" % (mime, base64.b64encode(img).decode())}},
+                {"type": "text", "text": PROMPT}]}],
+            "max_tokens": 60, "temperature": 0, "cache_prompt": True})
+        return core.vlm_from_caption(out["choices"][0]["message"]["content"])
     except Exception as e:
         print("vlm unavailable:", repr(e))
         return None

@@ -85,12 +85,31 @@ def parse_vlm(raw):
         return None
 
 
+_LITTER = ("garbage", "trash", "rubbish", "litter", "plastic", "waste", "bottle", "bags", "debris", "dump", "polluted", "wrapper")
+_SILT = ("mud", "silt", "sand", "soil", "dirt", "sludge", "muddy")
+_WATER = ("water", "puddle", "flood", "stagnant", "overflow", "sewage", "canal", "river", "pond", "wet")
+_BLOCKED = ("block", "clog", "choke", "jam", "stuck", "overflow", "full of")
+
+
+def vlm_from_caption(text):
+    """The vision model writes one plain sentence; we read it for signals.
+    Small models are unreliable at scoring but good at describing, so code does the judging."""
+    t = (text or "").lower().strip()
+    if not t:
+        return None
+    litter, silt = any(w in t for w in _LITTER), any(w in t for w in _SILT)
+    water, blocked = any(w in t for w in _WATER), any(w in t for w in _BLOCKED)
+    sev = max(1, min(5, 1 + (2 if litter else 0) + (1 if silt else 0) + (1 if blocked else 0) + (1 if water else 0)))
+    kind = "plastic_litter" if litter else "silt" if silt else "standing_water" if water else "none"
+    return {"severity": sev, "blockage": kind, "blocked": blocked or sev >= 4, "water": water, "summary": text.strip()[:200]}
+
+
 def combine(rek, vlm):
     """Final assessment. The vision model leads; Rekognition is the second opinion."""
     out = dict(rek)
     out["sources"] = {"rekognition": rek["severity"], "vlm": vlm["severity"] if vlm else None}
     if vlm:
-        out["severity"] = max(1, min(5, round(0.65 * vlm["severity"] + 0.35 * rek["severity"])))
+        out["severity"] = max(1, min(5, round(0.5 * vlm["severity"] + 0.5 * rek["severity"])))
         if vlm["blockage"] != "none":
             out["blockType"] = vlm["blockage"]
         elif vlm["water"]:

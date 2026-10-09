@@ -85,7 +85,7 @@ def test_combine_vlm_leads_but_rekognition_counts():
     rek = core.assess(L(drain=90))                      # severity 1
     vlm = core.parse_vlm({"severity": 5, "blockage": "plastic_litter", "blocked": True, "summary": "x"})
     c = core.combine(rek, vlm)
-    assert c["severity"] == 4 and c["blockType"] == "plastic_litter"  # 0.65*5 + 0.35*1 = 3.6 -> 4
+    assert c["severity"] == 3 and c["blockType"] == "plastic_litter"  # 0.5*5 + 0.5*1 = 3
     assert core.combine(rek, None)["severity"] == 1
 
 
@@ -97,3 +97,13 @@ def test_clearing_rule_needs_real_improvement():
     assert core.verify_after(three, one, *g)["verified"]
     assert not core.verify_after(three, two, *g)["verified"]
     assert core.verify_after(two, one, *g)["verified"]
+
+
+def test_caption_reading():
+    dirty = core.vlm_from_caption("A polluted river with garbage floating in it.")
+    assert dirty["severity"] >= 4 and dirty["blockage"] == "plastic_litter"
+    car = core.vlm_from_caption("A black car is parked next to a puddle on the street.")
+    assert car["severity"] == 2 and car["blockage"] == "standing_water"
+    clean = core.vlm_from_caption("A clean paved street with a drain cover.")
+    assert clean["severity"] == 1 and clean["blockage"] == "none"
+    assert core.vlm_from_caption("") is None

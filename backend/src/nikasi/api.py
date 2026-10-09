@@ -162,4 +162,7 @@ def briefing_audio():
 
 
 def handler(event, context):
+    # CORS preflight: the gateway adds the CORS headers, the function only has to say 200.
+    if event.get("requestContext", {}).get("http", {}).get("method") == "OPTIONS":
+        return {"statusCode": 204}
     return app.resolve(event, context)
