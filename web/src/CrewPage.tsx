@@ -57,7 +57,7 @@ export function CrewPage() {
         </div>
         <div className="desk-right">
           {current ? (
-            <Ticket r={current}>
+            <Ticket key={current.reportId} r={current}>
               {current.status === 'AWAITING_FIX' ? (
                 <div className="dispatch">
                   <span className="label">After-photo</span>

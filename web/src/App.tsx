@@ -23,6 +23,12 @@ export default function App() {
     return () => window.removeEventListener('hashchange', on);
   }, []);
   const go = useCallback((t: string) => setTab(t as Tab), []);
+  useEffect(() => {
+    const on = () => document.querySelector('.top')?.classList.toggle('scrolled', scrollY > 8);
+    on();
+    addEventListener('scroll', on, { passive: true });
+    return () => removeEventListener('scroll', on);
+  }, []);
 
   return (
     <>
@@ -36,7 +42,7 @@ export default function App() {
           </nav>
         </div>
       </header>
-      <main>
+      <main key={tab} className="page-in">
         {tab === 'home' ? <Home go={go} /> : null}
         {tab === 'report' ? <ReportPage /> : null}
         {tab === 'officer' ? <OfficerPage /> : null}

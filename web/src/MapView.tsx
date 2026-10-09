@@ -17,16 +17,22 @@ function Fit({ pts }: { pts: [number, number][] }) {
   return null;
 }
 
+const iconCache = new Map<string, L.DivIcon>();
 function pin(r: Report, selected: boolean) {
+  const key = [r.reportId, r.risk, r.severity, r.status, selected].join('|');
+  const hit = iconCache.get(key);
+  if (hit) return hit;
   const size = 22 + (r.severity || 1) * 4;
   const open = isOpen(r);
   const hot = open && (r.risk || 0) >= 75;
-  return L.divIcon({
+  const icon = L.divIcon({
     className: '',
     iconSize: [size, size],
     iconAnchor: [size / 2, size / 2],
     html: `<div class="pin ${selected ? 'sel' : ''} ${hot ? 'pulse' : ''}" style="width:${size}px;height:${size}px;background:${open ? riskColor(r.risk) : '#0e5a56'};opacity:${open ? 1 : 0.55}">${open ? r.risk ?? '' : '&#10003;'}</div>`,
   });
+  iconCache.set(key, icon);
+  return icon;
 }
 
 export function TicketMap({ reports, selected, onSelect }: { reports: Report[]; selected?: string; onSelect: (id: string) => void }) {
@@ -37,7 +43,7 @@ export function TicketMap({ reports, selected, onSelect }: { reports: Report[]; 
       <TileLayer attribution={ATTR} url={TILES} />
       <Fit pts={pts} />
       {shown.map((r) => (
-        <Marker key={r.reportId + (selected === r.reportId)} position={[r.lat, r.lng]} icon={pin(r, selected === r.reportId)}
+        <Marker key={r.reportId} position={[r.lat, r.lng]} icon={pin(r, selected === r.reportId)}
           eventHandlers={{ click: () => onSelect(r.reportId) }} keyboard={false} />
       ))}
     </MapContainer>

@@ -1,7 +1,7 @@
 import type { ReactNode } from 'react';
 import type { Report } from './types';
 import { TYPE, clock, riskColor, short } from './util';
-import { Ladder, Severity, SlaBar, StatusChip, Tick } from './ui';
+import { Ladder, Severity, SlaBar, StatusChip, Tick, useCount } from './ui';
 
 const CHECK_LABEL: Record<string, string> = {
   cleared: 'The drain is clear',
@@ -11,6 +11,7 @@ const CHECK_LABEL: Record<string, string> = {
 
 export function Ticket({ r, children }: { r: Report; children?: ReactNode }) {
   const v = r.verification;
+  const riskShown = useCount(r.risk, 700);
   const closed = r.status === 'CLOSED_VERIFIED';
   return (
     <article className="sheet case" aria-label={`Report ${short(r.reportId)}`}>
@@ -33,7 +34,7 @@ export function Ticket({ r, children }: { r: Report; children?: ReactNode }) {
           <dl className="facts">
             <div>
               <dt>Risk</dt>
-              <dd className="big" style={{ color: riskColor(r.risk) }}>{r.risk}<small>/100</small></dd>
+              <dd className="big" style={{ color: riskColor(r.risk) }}>{riskShown}<small>/100</small></dd>
               <div className="riskbar"><i style={{ width: `${r.risk}%`, background: riskColor(r.risk) }} /></div>
             </div>
             <div><dt>Severity</dt><dd><Severity value={r.severity} /></dd></div>

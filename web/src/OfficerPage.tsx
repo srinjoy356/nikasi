@@ -3,7 +3,7 @@ import { briefingAudio, dispatchCrew, getBriefing } from './api';
 import { useReports } from './hooks';
 import { TicketMap } from './MapView';
 import { Ticket } from './Ticket';
-import { Severity, StatusChip, fmtHours } from './ui';
+import { Severity, StatusChip, fmtHours, useCount, useTypewriter } from './ui';
 import { TYPE, isOpen, riskColor, short } from './util';
 
 const CREWS = ['Ward crew A', 'Ward crew B', 'Jet-vac team'];
@@ -18,6 +18,10 @@ export function OfficerPage() {
   const [busy, setBusy] = useState(false);
   const [msg, setMsg] = useState('');
   const audio = useRef<HTMLAudioElement>(null);
+  const typed = useTypewriter(brief || 'Press play to hear today’s priorities read aloud, or show the text.');
+  const nOpen = useCount(stats?.open);
+  const nVerified = useCount(stats?.verified);
+  const nEsc = useCount(stats?.escalated);
 
   const open = reports.filter(isOpen);
   const closed = reports.filter((r) => !isOpen(r));
@@ -52,9 +56,9 @@ export function OfficerPage() {
       </div>
 
       <div className="strip" style={{ marginBottom: 28 }}>
-        <div><b>{stats?.open ?? '—'}</b><span className="eyebrow">Open</span></div>
-        <div><b>{stats?.verified ?? '—'}</b><span className="eyebrow">Verified</span></div>
-        <div><b>{stats?.escalated ?? '—'}</b><span className="eyebrow">Escalated</span></div>
+        <div><b className={stats ? '' : 'skel'}>{nOpen}</b><span className="eyebrow">Open</span></div>
+        <div><b className={stats ? '' : 'skel'}>{nVerified}</b><span className="eyebrow">Verified</span></div>
+        <div><b className={stats ? '' : 'skel'}>{nEsc}</b><span className="eyebrow">Escalated</span></div>
         <div><b>{fmtHours(stats?.medianHoursToVerified)}</b><span className="eyebrow">Median to verified</span></div>
       </div>
       {error ? <p className="err" role="alert" style={{ marginBottom: 18 }}>{error}</p> : null}
@@ -70,7 +74,7 @@ export function OfficerPage() {
               </div>
             </div>
             <div className="sheet-b" style={{ display: 'grid', gap: 14 }}>
-              <p className={`brief-text ${lang === 'hi' ? 'hi' : ''}`}>{brief || 'Press play to hear today’s priorities read aloud, or show the text.'}</p>
+              <p className={`brief-text ${lang === 'hi' ? 'hi' : ''}`}>{typed}</p>
               <div style={{ display: 'flex', gap: 10, alignItems: 'center', flexWrap: 'wrap' }}>
                 <button className="btn primary sm" onClick={play} disabled={busy}>{busy ? 'Preparing voice…' : 'Play brief'}</button>
                 <button className="btn sm" onClick={() => loadBrief(lang)}>Show text</button>
@@ -118,7 +122,7 @@ export function OfficerPage() {
 
         <div className="desk-right">
           {current ? (
-            <Ticket r={current}>
+            <Ticket key={current.reportId} r={current}>
               {current.status === 'AWAITING_DISPATCH' ? (
                 <div className="dispatch">
                   <span className="label">Send a crew</span>

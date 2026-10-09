@@ -80,3 +80,54 @@ export function fmtHours(h?: number | null) {
   if (h === null || h === undefined) return '—';
   return h < 1 ? `${Math.max(1, Math.round(h * 60))} min` : `${h.toFixed(1)} h`;
 }
+
+/** Counts up to `target` on mount and whenever it changes. Shows an em dash until the value exists. */
+export function useCount(target: number | undefined, ms = 900) {
+  const [v, setV] = useState(0);
+  useEffect(() => {
+    if (target === undefined) return;
+    if (matchMedia('(prefers-reduced-motion: reduce)').matches) { setV(target); return; }
+    const t0 = performance.now();
+    let raf = 0;
+    const tick = (t: number) => {
+      const p = Math.min(1, (t - t0) / ms);
+      setV(Math.round(target * (1 - Math.pow(1 - p, 3))));
+      if (p < 1) raf = requestAnimationFrame(tick);
+    };
+    raf = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(raf);
+  }, [target, ms]);
+  return target === undefined ? '—' : String(v);
+}
+
+/** Adds `.in` to every `.reveal` element as it scrolls into view. Re-runs when `dep` changes. */
+export function useReveal(dep: unknown) {
+  useEffect(() => {
+    const els = [...document.querySelectorAll('.reveal:not(.in)')];
+    if (!('IntersectionObserver' in window)) { els.forEach((e) => e.classList.add('in')); return; }
+    const io = new IntersectionObserver((es) => es.forEach((e) => {
+      if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); }
+    }), { threshold: 0.12, rootMargin: '0px 0px -6% 0px' });
+    els.forEach((e) => io.observe(e));
+    return () => io.disconnect();
+  }, [dep]);
+}
+
+/** Reveals `text` a few characters at a time. Instant under reduced motion. */
+export function useTypewriter(text: string, cps = 80) {
+  const [n, setN] = useState(text.length);
+  useEffect(() => {
+    if (matchMedia('(prefers-reduced-motion: reduce)').matches) { setN(text.length); return; }
+    setN(0);
+    const t0 = performance.now();
+    let raf = 0;
+    const tick = (t: number) => {
+      const k = Math.min(text.length, Math.floor(((t - t0) / 1000) * cps));
+      setN(k);
+      if (k < text.length) raf = requestAnimationFrame(tick);
+    };
+    raf = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(raf);
+  }, [text, cps]);
+  return text.slice(0, n);
+}
