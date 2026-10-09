@@ -1,6 +1,6 @@
 """Wipe all reports, stop running workflows and delete uploaded photos. For re-recording the demo.
 
-usage: uv run --with boto3 python scripts/reset.py   (AWS_PROFILE=nikasi)
+usage: uv run --with boto3 --with "botocore[crt]" python scripts/reset.py   (AWS_PROFILE=nikasi)
 """
 import json
 import os

@@ -6,7 +6,7 @@ spoken line, the real clock visible.
 
 ## Before recording (10 minutes)
 
-1. `uv run --with boto3 python scripts/reset.py` to clear old tickets.
+1. `uv run --with boto3 --with "botocore[crt]" python scripts/reset.py` to clear old tickets.
 2. Seed with 5 to 6 real drain photos around the demo spot: `python scripts/seed.py PHOTOS LAT LNG --rain 55`.
 3. Open these tabs, in order: the web app (Officer desk), the Step Functions console (state machine `nikasi-ticket-workflow`),
    the DynamoDB table, CloudWatch Logs for the workflow, the S3 bucket, the Lambda console showing the vision-model function.
