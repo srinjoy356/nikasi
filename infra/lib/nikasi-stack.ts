@@ -42,7 +42,7 @@ export class NikasiStack extends cdk.Stack {
     });
 
     const topic = new sns.Topic(this, 'Escalations', { displayName: 'Nikasi escalations' });
-    const alertEmail = this.node.tryGetContext('alertEmail');
+    const alertEmail = this.node.tryGetContext('alertEmail') || process.env.NIKASI_ALERT_EMAIL;
     if (alertEmail) topic.addSubscription(new subs.EmailSubscription(alertEmail));
 
     const code = lambda.Code.fromAsset(path.join(__dirname, '../../backend/build'));

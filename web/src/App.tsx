@@ -1,39 +1,53 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
+import './fonts';
 import { CrewPage } from './CrewPage';
+import { Home } from './Home';
 import { OfficerPage } from './OfficerPage';
 import { ReportPage } from './ReportPage';
 
 const TABS = [
-  { id: 'report', label: 'Report a drain' },
-  { id: 'officer', label: 'Officer desk' },
-  { id: 'crew', label: 'Crew' },
+  { id: 'home', label: 'Nikasi', n: '00' },
+  { id: 'report', label: 'Report', n: '01' },
+  { id: 'officer', label: 'Officer desk', n: '02' },
+  { id: 'crew', label: 'Crew', n: '03' },
 ] as const;
 type Tab = typeof TABS[number]['id'];
 
-const fromHash = (): Tab => (TABS.find((t) => '#' + t.id === location.hash)?.id ?? 'report');
+const fromHash = (): Tab => (TABS.find((t) => '#' + t.id === location.hash)?.id ?? 'home');
 
 export default function App() {
   const [tab, setTab] = useState<Tab>(fromHash());
   useEffect(() => {
-    const on = () => setTab(fromHash());
+    const on = () => { setTab(fromHash()); window.scrollTo({ top: 0 }); };
     window.addEventListener('hashchange', on);
     return () => window.removeEventListener('hashchange', on);
   }, []);
+  const go = useCallback((t: string) => setTab(t as Tab), []);
+
   return (
     <>
       <header className="top">
-        <a className="brand" href="#report" aria-label="Nikasi home">
-          <svg width="26" height="26" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2C8 8 5 11 5 15a7 7 0 0 0 14 0c0-4-3-7-7-13Z" fill="currentColor" /></svg>
-          Nikasi
-        </a>
-        <nav aria-label="Main">
-          {TABS.map((t) => <a key={t.id} href={'#' + t.id} className={tab === t.id ? 'on' : ''} aria-current={tab === t.id ? 'page' : undefined}>{t.label}</a>)}
-        </nav>
+        <div className="top-in">
+          <a className="brand" href="#home" aria-label="Nikasi, home"><b>Nikasi</b><span lang="hi">निकासी</span></a>
+          <nav className="nav" aria-label="Main">
+            {TABS.filter((t) => t.id !== 'home').map((t) => (
+              <a key={t.id} href={'#' + t.id} className={tab === t.id ? 'on' : ''} aria-current={tab === t.id ? 'page' : undefined}><i>{t.n}</i>{t.label}</a>
+            ))}
+          </nav>
+        </div>
       </header>
       <main>
-        {tab === 'report' ? <ReportPage /> : tab === 'officer' ? <OfficerPage /> : <CrewPage />}
+        {tab === 'home' ? <Home go={go} /> : null}
+        {tab === 'report' ? <ReportPage /> : null}
+        {tab === 'officer' ? <OfficerPage /> : null}
+        {tab === 'crew' ? <CrewPage /> : null}
       </main>
-      <footer>Nikasi closes a ticket only when it sees a clear drain. Built for the AWS Environmental Hacks.</footer>
+      <footer className="foot">
+        <div className="wrap">
+          <p>Nikasi closes a ticket only when it sees a clear drain. Built solo for the AWS Environmental Hacks, Heat and Water track.</p>
+          <p>AWS Step Functions &middot; Lambda &middot; Rekognition &middot; Polly &middot; DynamoDB &middot; S3 &middot; API Gateway &middot; Amplify. Map &copy; OpenStreetMap contributors.</p>
+        </div>
+      </footer>
     </>
   );
 }

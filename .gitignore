@@ -12,3 +12,4 @@ backend/build/
 cdk-outputs.json
 backend/vlm/models/
 web/dist.zip
+.alert-email

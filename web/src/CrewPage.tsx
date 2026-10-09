@@ -1,8 +1,9 @@
 import { useRef, useState } from 'react';
 import { compress, submitAfter, uploadPhoto, whereAmI } from './api';
 import { useReports } from './hooks';
-import { Pill, Ticket } from './Ticket';
-import { TYPE } from './util';
+import { Ticket } from './Ticket';
+import { StatusChip } from './ui';
+import { TYPE, short } from './util';
 
 export function CrewPage() {
   const { reports, error, refresh } = useReports();
@@ -32,33 +33,44 @@ export function CrewPage() {
   }
 
   return (
-    <section className="page narrow">
-      <h2>Crew</h2>
-      <p className="lede">Clear the drain, then take an after-photo at the same spot. The ticket closes only if the photo shows a clear drain.</p>
-      {error ? <p className="error" role="alert">{error}</p> : null}
-      {!mine.length ? <p className="empty">No jobs yet. Approved dispatches appear here.</p> : null}
-      <ul className="queue">
-        {mine.map((r) => (
-          <li key={r.reportId}>
-            <button className={current?.reportId === r.reportId ? 'sel' : ''} onClick={() => setSel(r.reportId)}>
-              <span className="q-main"><b>Report {r.reportId.slice(0, 4)}</b><small>{TYPE[r.blockType || ''] || ''} · {r.crew || ''}</small></span>
-              <Pill status={r.status} />
-            </button>
-          </li>
-        ))}
-      </ul>
-      {current ? (
-        <Ticket r={current}>
-          {current.status === 'AWAITING_FIX' ? (
-            <div className="dispatch">
-              <input ref={fileRef} type="file" accept="image/*" capture="environment" hidden onChange={(e) => onFile(e.target.files?.[0])} />
-              <button className="btn primary" disabled={busy} onClick={() => fileRef.current?.click()}>{busy ? 'Uploading…' : 'Take the after-photo'}</button>
-              <label className="check"><input type="checkbox" checked={spot} onChange={(e) => setSpot(e.target.checked)} /> Demo: pretend I am at the reported spot</label>
-            </div>
+    <div className="wrap page">
+      <div className="page-h">
+        <p className="eyebrow">Crew &middot; Field jobs</p>
+        <h1>Clear it, then <em style={{ color: 'var(--signal)' }}>show us.</em></h1>
+        <p className="lede">Take an after-photo at the same spot. The ticket closes only if it shows a clear drain, taken here, after you were sent.</p>
+      </div>
+      {error ? <p className="err" role="alert" style={{ marginBottom: 18 }}>{error}</p> : null}
+      <div className="desk">
+        <div className="desk-left">
+          <ul className="queue">
+            {mine.map((r) => (
+              <li key={r.reportId}>
+                <button className={`qrow ${current?.reportId === r.reportId ? 'sel' : ''}`} onClick={() => setSel(r.reportId)}>
+                  <span className="risk">{short(r.reportId)}</span>
+                  <span className="t"><b>{TYPE[r.blockType || ''] || 'Drain'}</b><span>{r.crew || ''}</span></span>
+                  <span className="side"><StatusChip status={r.status} /></span>
+                </button>
+              </li>
+            ))}
+            {!mine.length ? <li className="empty">No jobs yet. Dispatches approved at the officer desk appear here.</li> : null}
+          </ul>
+        </div>
+        <div className="desk-right">
+          {current ? (
+            <Ticket r={current}>
+              {current.status === 'AWAITING_FIX' ? (
+                <div className="dispatch">
+                  <span className="label">After-photo</span>
+                  <input ref={fileRef} type="file" accept="image/*" capture="environment" hidden onChange={(e) => onFile(e.target.files?.[0])} />
+                  <button className="btn primary" disabled={busy} onClick={() => fileRef.current?.click()}>{busy ? 'Uploading…' : <>Take the after-photo <span className="arrow">&rarr;</span></>}</button>
+                  <label className="check"><input type="checkbox" checked={spot} onChange={(e) => setSpot(e.target.checked)} />Demo: pretend I am standing at the reported spot.</label>
+                  {msg ? <p className="err" role="alert">{msg}</p> : null}
+                </div>
+              ) : null}
+            </Ticket>
           ) : null}
-          {msg ? <p className="error" role="alert">{msg}</p> : null}
-        </Ticket>
-      ) : null}
-    </section>
+        </div>
+      </div>
+    </div>
   );
 }
