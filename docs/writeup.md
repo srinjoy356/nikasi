@@ -52,6 +52,10 @@ to every yes/no question. As a *describer* it was accurate. So the model only wr
 officer as "what the model sees"; code reads it for signals and cross-checks with Rekognition. If the model is cold
 or down, triage falls back to Rekognition and the ticket timeline says so.
 
+## Photos
+
+The sample photos in the repo are openly licensed images from Wikimedia Commons, credited in `demo-photos/CREDITS.md`. [Replace with: my own field photos of drains taken on DATE, if you add them.]
+
 ## What I learned
 
 - Small models are better describers than judges. Make them describe, then judge in code you can test.

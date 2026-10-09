@@ -183,8 +183,8 @@ def verify_after(before, after, before_geo, after_geo, dispatched_at, after_at, 
         at_place, dist_txt = False, "no location on the after-photo"
     fresh = after_at > dispatched_at
     checks = {
-        "cleared": {"ok": bool(cleared), "detail": "blockage score %.2f -> %.2f, severity %s -> %s"
-                    % (b_block, a_block, before["severity"], after["severity"])},
+        "cleared": {"ok": bool(cleared), "detail": "severity %s of 5 before, %s of 5 after"
+                    % (before["severity"], after["severity"])},
         "atPlace": {"ok": bool(at_place), "detail": dist_txt},
         "afterDispatch": {"ok": bool(fresh), "detail": "photo taken %s the dispatch" % ("after" if fresh else "before")},
     }

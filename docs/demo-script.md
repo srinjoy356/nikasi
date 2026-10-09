@@ -7,7 +7,7 @@ spoken line, the real clock visible.
 ## Before recording (10 minutes)
 
 1. `uv run --with boto3 --with "botocore[crt]" python scripts/reset.py` to clear old tickets.
-2. Seed with 5 to 6 real drain photos around the demo spot: `python scripts/seed.py PHOTOS LAT LNG --rain 55`.
+2. Seed with real drain photos around the demo spot: `python scripts/seed.py PHOTOS LAT LNG --rain 55` (about 30 s per photo). `demo-photos/` works as a stand-in; use your own photos for the hero ticket.
 3. Open these tabs, in order: the web app (Officer desk), the Step Functions console (state machine `nikasi-ticket-workflow`),
    the DynamoDB table, CloudWatch Logs for the workflow, the S3 bucket, the Lambda console showing the vision-model function.
 4. Warm the model: wait for the 5-minute keep-warm to run, or file one report and let it triage.

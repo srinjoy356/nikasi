@@ -76,6 +76,27 @@ spot*, because the person recording is not standing at the drain. There is no lo
 unauthenticated in this prototype. The officer side is a simulation of a ward desk, not an integration with any
 municipal system.
 
+## Sample photos
+
+`demo-photos/` holds 11 drain photos from Wikimedia Commons (CC BY or CC BY-SA), with author and licence in
+[demo-photos/CREDITS.md](demo-photos/CREDITS.md). They exist to test and demonstrate the pipeline. Real field photos
+of local drains should replace them: `python scripts/seed.py YOUR_PHOTOS LAT LNG`.
+
+## Limits worth knowing
+
+- **Lambda concurrency:** a new AWS account allows 10 concurrent Lambda executions and 3,008 MB per function. One
+  triage holds two executions for about 30 seconds, so a burst of more than a handful of simultaneous reports can
+  be throttled; the workflow retries and falls back to Rekognition. `seed.py` spaces reports out for this reason.
+- **Photo reading time:** a cold vision model takes about 2 minutes for the first photo, about 30 seconds after.
+- **Deep links:** `#officer/<reportId>` opens a ticket directly; escalation emails link to it.
+
+## Design
+
+The interface is a deliberate "monsoon engineer's survey sheet": tracing-paper ground, a serif for statements
+(Fraunces), a grotesque for reading (Hanken Grotesk), mono for anything measurable (IBM Plex Mono), and Devanagari
+(Tiro Devanagari Hindi) for the wordmark and the Hindi brief. Colour is spent only on state. Fonts are self-hosted.
+The home page drawing is hand-built SVG animated with CSS only.
+
 ## Run it
 
 ```bash

@@ -1,11 +1,13 @@
 """Fill the demo with reports from a folder of real drain photos, through the public API (same path a citizen uses).
 
-usage: python seed.py PHOTO_DIR LAT LNG [--rain MM] [--fast]
+usage: python seed.py PHOTO_DIR LAT LNG [--rain MM] [--fast] [--gap SECONDS]
+New AWS accounts allow only 10 concurrent Lambda executions and each triage holds two, so reports are spaced out (default 28 s).
 Photos are spread within ~400 m of LAT,LNG. Use your own photos: every report is a real triage run.
 """
 import json
 import random
 import sys
+import time
 from pathlib import Path
 
 exec(open(Path(__file__).with_name("smoke.py")).read().split("def main")[0])  # call(), put()
@@ -14,6 +16,7 @@ args = [a for a in sys.argv[1:] if not a.startswith("--")]
 folder, lat, lng = Path(args[0]), float(args[1]), float(args[2])
 rain = float(sys.argv[sys.argv.index("--rain") + 1]) if "--rain" in sys.argv else None
 scale = 0.005 if "--fast" in sys.argv else 1.0
+gap = float(sys.argv[sys.argv.index("--gap") + 1]) if "--gap" in sys.argv else 28.0
 random.seed(7)
 for img in sorted(p for p in folder.iterdir() if p.suffix.lower() in (".jpg", ".jpeg")):
     up = call("POST", "/upload-url", {"kind": "before", "contentType": "image/jpeg"})
@@ -23,4 +26,5 @@ for img in sorted(p for p in folder.iterdir() if p.suffix.lower() in (".jpg", ".
     if rain is not None:
         body["simulatedRainMm"] = rain
     r = call("POST", "/reports", body)
-    print(img.name, "->", r.get("reportId"), r.get("status"), r.get("_error", ""))
+    print(img.name, "->", r.get("reportId"), r.get("status"), r.get("_error", ""), flush=True)
+    time.sleep(gap)

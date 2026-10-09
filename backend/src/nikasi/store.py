@@ -38,7 +38,8 @@ def update(rid, **fields):
     names = {"#%d" % i: k for i, k in enumerate(fields)}
     values = {":%d" % i: to_ddb(v) for i, v in enumerate(fields.values())}
     expr = "SET " + ", ".join("#%d = :%d" % (i, i) for i in range(len(fields)))
-    table().update_item(Key={"reportId": rid}, UpdateExpression=expr,
+    # attribute_exists: never resurrect a ticket that was deleted while a workflow was still running
+    table().update_item(Key={"reportId": rid}, UpdateExpression=expr, ConditionExpression="attribute_exists(reportId)",
                         ExpressionAttributeNames=names, ExpressionAttributeValues=values)
 
 
@@ -48,6 +49,7 @@ def log(rid, what, detail=""):
     table().update_item(
         Key={"reportId": rid},
         UpdateExpression="SET timeline = list_append(if_not_exists(timeline, :e), :n)",
+        ConditionExpression="attribute_exists(reportId)",
         ExpressionAttributeValues={":e": [], ":n": ev})
 
 
@@ -57,5 +59,6 @@ def all_items():
         r = table().scan(**kw)
         out += r["Items"]
         if "LastEvaluatedKey" not in r:
-            return [from_ddb(i) for i in out]
+            # skip malformed records (no status or location) so one bad row can never break the list
+            return [from_ddb(i) for i in out if "status" in i and "lat" in i and "lng" in i]
         kw["ExclusiveStartKey"] = r["LastEvaluatedKey"]
