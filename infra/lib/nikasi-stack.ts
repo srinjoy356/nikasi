@@ -45,6 +45,9 @@ export class NikasiStack extends cdk.Stack {
     const alertEmail = this.node.tryGetContext('alertEmail') || process.env.NIKASI_ALERT_EMAIL;
     if (alertEmail) topic.addSubscription(new subs.EmailSubscription(alertEmail));
 
+    const webApp = new amplify.CfnApp(this, 'WebApp', { name: 'nikasi', platform: 'WEB' });
+    const webUrl = `https://main.${webApp.attrDefaultDomain}`;
+
     const code = lambda.Code.fromAsset(path.join(__dirname, '../../backend/build'));
     const common = {
       runtime: lambda.Runtime.PYTHON_3_12,
@@ -54,6 +57,7 @@ export class NikasiStack extends cdk.Stack {
         BUCKET: bucket.bucketName,
         TOPIC_ARN: topic.topicArn,
         POWERTOOLS_SERVICE_NAME: 'nikasi',
+        WEB_URL: webUrl,
       },
     };
 
@@ -166,7 +170,7 @@ export class NikasiStack extends cdk.Stack {
     stage.defaultRouteSettings = { throttlingBurstLimit: 20, throttlingRateLimit: 10 };
 
     // ---- the web app (HTTPS on Amplify so camera and GPS work on phones) ----
-    const app = new amplify.CfnApp(this, 'WebApp', { name: 'nikasi', platform: 'WEB' });
+    const app = webApp;
     new amplify.CfnBranch(this, 'WebBranch', { appId: app.attrAppId, branchName: 'main', stage: 'PRODUCTION' });
 
     new cdk.CfnOutput(this, 'ApiUrl', { value: api.apiEndpoint });

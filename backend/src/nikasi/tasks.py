@@ -105,7 +105,8 @@ def escalate(e):
     topic = os.environ.get("TOPIC_ARN")
     if topic:
         sns.publish(TopicArn=topic, Subject="Nikasi: report %s escalated to %s" % (rid[:4], who),
-                    Message="Report %s was escalated to %s.\nReason: %s\n" % (rid, who, e["reason"]))
+                    Message="Report %s was escalated to %s.\nReason: %s\nOpen it: %s/#officer/%s\n"
+                    % (rid[:4].upper(), who, e["reason"], os.environ.get("WEB_URL", ""), rid))
     return new
 
 

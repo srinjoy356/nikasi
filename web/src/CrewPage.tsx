@@ -7,7 +7,7 @@ import { TYPE, short } from './util';
 
 export function CrewPage() {
   const { reports, error, refresh } = useReports();
-  const [sel, setSel] = useState<string | undefined>();
+  const [sel, setSel] = useState<string | undefined>(location.hash.split('/')[1] || undefined);
   const [spot, setSpot] = useState(false);
   const [busy, setBusy] = useState(false);
   const [msg, setMsg] = useState('');
@@ -45,7 +45,7 @@ export function CrewPage() {
           <ul className="queue">
             {mine.map((r) => (
               <li key={r.reportId}>
-                <button className={`qrow ${current?.reportId === r.reportId ? 'sel' : ''}`} onClick={() => setSel(r.reportId)}>
+                <button className={`qrow id ${current?.reportId === r.reportId ? 'sel' : ''}`} onClick={() => setSel(r.reportId)}>
                   <span className="risk">{short(r.reportId)}</span>
                   <span className="t"><b>{TYPE[r.blockType || ''] || 'Drain'}</b><span>{r.crew || ''}</span></span>
                   <span className="side"><StatusChip status={r.status} /></span>

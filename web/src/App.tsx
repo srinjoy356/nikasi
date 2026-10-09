@@ -13,7 +13,7 @@ const TABS = [
 ] as const;
 type Tab = typeof TABS[number]['id'];
 
-const fromHash = (): Tab => (TABS.find((t) => '#' + t.id === location.hash)?.id ?? 'home');
+const fromHash = (): Tab => (TABS.find((t) => t.id === location.hash.slice(1).split('/')[0])?.id ?? 'home');
 
 export default function App() {
   const [tab, setTab] = useState<Tab>(fromHash());

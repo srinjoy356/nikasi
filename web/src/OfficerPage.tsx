@@ -10,7 +10,7 @@ const CREWS = ['Ward crew A', 'Ward crew B', 'Jet-vac team'];
 
 export function OfficerPage() {
   const { reports, stats, error, refresh } = useReports();
-  const [sel, setSel] = useState<string | undefined>();
+  const [sel, setSel] = useState<string | undefined>(location.hash.split('/')[1] || undefined);
   const [crew, setCrew] = useState(CREWS[0]);
   const [lang, setLang] = useState<'en' | 'hi'>('en');
   const [brief, setBrief] = useState('');
