@@ -12,6 +12,9 @@ import * as tasks from 'aws-cdk-lib/aws-stepfunctions-tasks';
 import * as apigw from 'aws-cdk-lib/aws-apigatewayv2';
 import * as integ from 'aws-cdk-lib/aws-apigatewayv2-integrations';
 import * as amplify from 'aws-cdk-lib/aws-amplify';
+import * as events from 'aws-cdk-lib/aws-events';
+import * as targets from 'aws-cdk-lib/aws-events-targets';
+import { Platform } from 'aws-cdk-lib/aws-ecr-assets';
 import * as path from 'path';
 
 const MAX_LEVEL = 3; // Junior Engineer -> Assistant -> Executive -> Ward Commissioner
@@ -54,9 +57,24 @@ export class NikasiStack extends cdk.Stack {
       },
     };
 
+    // Open-weight vision model (SmolVLM2 via llama.cpp) running in Lambda behind an IAM-protected URL.
+    const vlmFn = new lambda.DockerImageFunction(this, 'VisionModelFn', {
+      code: lambda.DockerImageCode.fromImageAsset(path.join(__dirname, '../../backend/vlm'), { platform: Platform.LINUX_AMD64 }),
+      architecture: lambda.Architecture.X86_64,
+      memorySize: 10240, timeout: cdk.Duration.minutes(5),
+    });
+    const vlmUrl = vlmFn.addFunctionUrl({ authType: lambda.FunctionUrlAuthType.AWS_IAM });
+
     const tasksFn = new lambda.Function(this, 'TasksFn', {
       ...common, handler: 'nikasi.tasks.handler',
-      timeout: cdk.Duration.seconds(60), memorySize: 512,
+      timeout: cdk.Duration.minutes(5), memorySize: 512,
+      environment: { ...common.environment, VLM_URL: vlmUrl.url },
+    });
+    vlmUrl.grantInvokeUrl(tasksFn);
+    vlmFn.grantInvoke(tasksFn);
+    new events.Rule(this, 'KeepVisionWarm', {
+      schedule: events.Schedule.rate(cdk.Duration.minutes(5)),
+      targets: [new targets.LambdaFunction(tasksFn, { event: events.RuleTargetInput.fromObject({ action: 'warm' }) })],
     });
     table.grantReadWriteData(tasksFn);
     bucket.grantRead(tasksFn);

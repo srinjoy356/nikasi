@@ -1,8 +1,13 @@
 """Step Functions task handlers. One Lambda, one action per state."""
+import base64
+import json
 import os
 import time
+import urllib.request
 
 import boto3
+from botocore.auth import SigV4Auth
+from botocore.awsrequest import AWSRequest
 
 from . import core, store
 
@@ -10,10 +15,64 @@ rek = boto3.client("rekognition")
 sns = boto3.client("sns")
 
 
+REGION = os.environ.get("AWS_REGION", "us-east-1")
+s3 = boto3.client("s3")
+
+PROMPT = ("You are a drainage inspector looking at a photo from a citizen. Judge only the street drain, gutter "
+          "or nala in the photo. Reply with JSON only: severity 1 to 5 (1 = clear and flowing, 3 = half blocked, "
+          "5 = fully blocked or overflowing), blockage one of plastic_litter, silt, debris, standing_water, none, "
+          "blocked true or false, water_standing true or false, summary one short plain sentence.")
+SCHEMA = {"type": "object", "properties": {
+    "severity": {"type": "integer", "minimum": 1, "maximum": 5},
+    "blockage": {"type": "string", "enum": ["plastic_litter", "silt", "debris", "standing_water", "none"]},
+    "blocked": {"type": "boolean"}, "water_standing": {"type": "boolean"}, "summary": {"type": "string"}},
+    "required": ["severity", "blockage", "blocked", "water_standing", "summary"]}
+
+
+def vlm_call(path, payload=None, timeout=100):
+    """Signed call to the vision-model Lambda (function URL, IAM auth). payload=None means GET."""
+    url = os.environ["VLM_URL"].rstrip("/") + path
+    body = json.dumps(payload).encode() if payload is not None else None
+    req = AWSRequest(method="POST" if body else "GET", url=url, data=body,
+                     headers={"Content-Type": "application/json"} if body else {})
+    SigV4Auth(boto3.Session().get_credentials().get_frozen_credentials(), "lambda", REGION).add_auth(req)
+    r = urllib.request.Request(url, data=body, headers=dict(req.headers), method=req.method)
+    with urllib.request.urlopen(r, timeout=timeout) as resp:
+        return json.load(resp)
+
+
+def read_with_vlm(key):
+    """Ask the open-weight vision model. Returns a validated dict or None (never raises)."""
+    if not os.environ.get("VLM_URL"):
+        return None
+    try:
+        img = s3.get_object(Bucket=os.environ["BUCKET"], Key=key)["Body"].read()
+        mime = "image/png" if key.endswith(".png") else "image/jpeg"
+        out = vlm_call("/v1/chat/completions", {
+            "messages": [{"role": "user", "content": [
+                {"type": "text", "text": PROMPT},
+                {"type": "image_url", "image_url": {"url": "data:%s;base64,%s" % (mime, base64.b64encode(img).decode())}}]}],
+            "max_tokens": 200, "temperature": 0.1,
+            "response_format": {"type": "json_object", "schema": SCHEMA}})
+        return core.parse_vlm(out["choices"][0]["message"]["content"])
+    except Exception as e:
+        print("vlm unavailable:", repr(e))
+        return None
+
+
 def detect(key):
     r = rek.detect_labels(Image={"S3Object": {"Bucket": os.environ["BUCKET"], "Name": key}},
                           MaxLabels=40, MinConfidence=50)
-    return core.assess(r["Labels"])
+    return core.combine(core.assess(r["Labels"]), read_with_vlm(key))
+
+
+def warm(e):
+    """Keep the vision model's Lambda warm so triage is fast when a report arrives."""
+    try:
+        vlm_call("/health", timeout=60)
+        return {"warm": True}
+    except Exception as ex:
+        return {"warm": False, "error": repr(ex)}
 
 
 def triage(e):
@@ -29,8 +88,10 @@ def triage(e):
                  rainMm=rain if rain is not None else 0, rainSource="simulated" if sim is not None
                  else ("forecast" if rain is not None else "unavailable"),
                  clusterCount=clusters, risk=risk, dispatchSla=d, fixSla=f, level=0)
-    store.log(rid, "Triaged", "severity %d/5, %s, rain %s mm, %d nearby, risk %d"
-              % (a["severity"], core.TYPE_EN[a["blockType"]], rain, clusters, risk))
+    src = a.get("sources", {})
+    store.log(rid, "Triaged", "severity %d/5 (vision model %s, Rekognition %s), %s, rain %s mm, %d nearby, risk %d. %s"
+              % (a["severity"], src.get("vlm"), src.get("rekognition"), core.TYPE_EN[a["blockType"]], rain,
+                 clusters, risk, a.get("summary", "")))
     return {"risk": risk, "severity": a["severity"], "dispatchSla": d, "fixSla": f}
 
 
@@ -79,7 +140,7 @@ def close(e):
     return {"status": status}
 
 
-ACTIONS = {"triage": triage, "registerWait": register_wait, "escalate": escalate,
+ACTIONS = {"warm": warm, "triage": triage, "registerWait": register_wait, "escalate": escalate,
            "verify": verify, "close": close}
 
 

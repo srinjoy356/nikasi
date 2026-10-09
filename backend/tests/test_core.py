@@ -71,3 +71,29 @@ def test_briefing_both_languages():
               "status": "AWAITING_FIX", "rainMm": 40}]
     assert "plastic and litter" in core.briefing(items, "en")
     assert "प्लास्टिक" in core.briefing(items, "hi")
+
+
+def test_parse_vlm_accepts_valid_and_rejects_junk():
+    ok = core.parse_vlm('{"severity": 4, "blockage": "plastic_litter", "blocked": true, "summary": "full of bags"}')
+    assert ok and ok["severity"] == 4
+    assert core.parse_vlm("not json") is None
+    assert core.parse_vlm('{"severity": 9, "blockage": "none"}') is None
+    assert core.parse_vlm('{"severity": 2, "blockage": "lava"}') is None
+
+
+def test_combine_vlm_leads_but_rekognition_counts():
+    rek = core.assess(L(drain=90))                      # severity 1
+    vlm = core.parse_vlm({"severity": 5, "blockage": "plastic_litter", "blocked": True, "summary": "x"})
+    c = core.combine(rek, vlm)
+    assert c["severity"] == 4 and c["blockType"] == "plastic_litter"  # 0.65*5 + 0.35*1 = 3.6 -> 4
+    assert core.combine(rek, None)["severity"] == 1
+
+
+def test_clearing_rule_needs_real_improvement():
+    two = {"severity": 2, "blockScore": 0.25}
+    three = {"severity": 3, "blockScore": 0.5}
+    one = {"severity": 1, "blockScore": 0.0}
+    g = ((1, 1), (1, 1), 1.0, 2.0)
+    assert core.verify_after(three, one, *g)["verified"]
+    assert not core.verify_after(three, two, *g)["verified"]
+    assert core.verify_after(two, one, *g)["verified"]

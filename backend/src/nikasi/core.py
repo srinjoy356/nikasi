@@ -68,6 +68,39 @@ def assess(labels):
             "blockType": btype, "drainContext": drain, "topLabels": top}
 
 
+VLM_TYPES = {"plastic_litter", "silt", "debris", "standing_water", "none"}
+
+
+def parse_vlm(raw):
+    """Validate the vision model's JSON. Returns a clean dict or None if unusable."""
+    try:
+        d = raw if isinstance(raw, dict) else json.loads(raw)
+        sev = int(d["severity"])
+        btype = str(d.get("blockage", "none"))
+        if not 1 <= sev <= 5 or btype not in VLM_TYPES:
+            return None
+        return {"severity": sev, "blockage": btype, "blocked": bool(d.get("blocked", sev >= 3)),
+                "water": bool(d.get("water_standing", False)), "summary": str(d.get("summary", ""))[:200]}
+    except Exception:
+        return None
+
+
+def combine(rek, vlm):
+    """Final assessment. The vision model leads; Rekognition is the second opinion."""
+    out = dict(rek)
+    out["sources"] = {"rekognition": rek["severity"], "vlm": vlm["severity"] if vlm else None}
+    if vlm:
+        out["severity"] = max(1, min(5, round(0.65 * vlm["severity"] + 0.35 * rek["severity"])))
+        if vlm["blockage"] != "none":
+            out["blockType"] = vlm["blockage"]
+        elif vlm["water"]:
+            out["blockType"] = "standing_water"
+        out["summary"] = vlm["summary"]
+        out["standing"] = max(out["standing"], 0.8 if vlm["water"] else 0.0)
+    out["blockScore"] = round((out["severity"] - 1) / 4.0, 3)
+    return out
+
+
 def haversine_m(lat1, lng1, lat2, lng2):
     r = 6371000.0
     p1, p2 = math.radians(lat1), math.radians(lat2)
@@ -117,7 +150,7 @@ def rain_forecast(lat, lng, timeout=4):
 def verify_after(before, after, before_geo, after_geo, dispatched_at, after_at, max_m=75):
     """Three independent checks. All must pass for a ticket to close."""
     b_block, a_block = _dec(before["blockScore"]), _dec(after["blockScore"])
-    cleared = a_block <= 0.45 * b_block or after["severity"] <= 1
+    cleared = after["severity"] <= 1 or before["severity"] - after["severity"] >= 2
     if after_geo and before_geo:
         dist = haversine_m(_dec(before_geo[0]), _dec(before_geo[1]), _dec(after_geo[0]), _dec(after_geo[1]))
         at_place, dist_txt = dist <= max_m, "%d m from the reported spot" % dist
