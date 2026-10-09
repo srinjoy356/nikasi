@@ -8,3 +8,5 @@ cdk.out/
 __pycache__/
 .next/
 dist/
+backend/build/
+cdk-outputs.json
