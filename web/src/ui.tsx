@@ -68,11 +68,13 @@ export function SlaBar({ r }: { r: Report }) {
   );
 }
 
-export function Tick({ ok }: { ok: boolean }) {
-  return ok ? (
-    <svg viewBox="0 0 24 24" fill="none" stroke="var(--teal)" strokeWidth="2.4" strokeLinecap="square" aria-label="passed"><circle cx="12" cy="12" r="10" strokeWidth="1.6" /><path d="M7 12.5l3.2 3.2L17 8.8" /></svg>
-  ) : (
-    <svg viewBox="0 0 24 24" fill="none" stroke="var(--signal)" strokeWidth="2.4" strokeLinecap="square" aria-label="failed"><circle cx="12" cy="12" r="10" strokeWidth="1.6" /><path d="M8 8l8 8M16 8l-8 8" /></svg>
+export function Tick({ ok, i = 0 }: { ok: boolean; i?: number }) {
+  return (
+    <svg className="tick" style={{ ['--i' as string]: i }} viewBox="0 0 24 24" fill="none" stroke={ok ? 'var(--teal)' : 'var(--signal)'}
+      strokeWidth="2.4" strokeLinecap="square" role="img" aria-label={ok ? 'passed' : 'failed'}>
+      <circle cx="12" cy="12" r="10" strokeWidth="1.6" pathLength={1} />
+      <path d={ok ? 'M7 12.5l3.2 3.2L17 8.8' : 'M8 8l8 8M16 8l-8 8'} pathLength={1} />
+    </svg>
   );
 }
 

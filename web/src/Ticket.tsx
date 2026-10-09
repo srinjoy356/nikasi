@@ -1,6 +1,7 @@
 import type { ReactNode } from 'react';
 import type { Report } from './types';
 import { TYPE, clock, riskColor, short } from './util';
+import { Compare } from './Compare';
 import { Ladder, Severity, SlaBar, StatusChip, Tick, useCount } from './ui';
 
 const CHECK_LABEL: Record<string, string> = {
@@ -9,16 +10,31 @@ const CHECK_LABEL: Record<string, string> = {
   afterDispatch: 'Taken after dispatch',
 };
 
+const ORDER = ['cleared', 'atPlace', 'afterDispatch'];
+const PENDING: Record<string, string> = {
+  cleared: 'reading the new photo',
+  atPlace: 'comparing its location with the report',
+  afterDispatch: 'comparing its time with the dispatch',
+};
+const delay = (n: number) => ({ ['--i' as string]: n });
+
 export function Ticket({ r, children }: { r: Report; children?: ReactNode }) {
   const v = r.verification;
   const riskShown = useCount(r.risk, 700);
   const closed = r.status === 'CLOSED_VERIFIED';
+  const verifying = r.status === 'VERIFYING' && !v;
+  const passed = v ? Object.values(v.checks).filter((c) => c.ok).length : 0;
   return (
-    <article className="sheet case" aria-label={`Report ${short(r.reportId)}`}>
-      {r.photoUrl || r.afterUrl ? (
+    <article className={`sheet case ${v ? (v.verified ? 'ring-ok' : 'ring-no') : ''}`} aria-label={`Report ${short(r.reportId)}`}>
+      {r.photoUrl && r.afterUrl && v ? <Compare before={r.photoUrl} after={r.afterUrl} /> : r.photoUrl || r.afterUrl ? (
         <div className="case-photos">
           {r.photoUrl ? <figure><img src={r.photoUrl} alt="The reported drain" /><figcaption>Before</figcaption></figure> : null}
-          {r.afterUrl ? <figure><img src={r.afterUrl} alt="The drain after the fix" /><figcaption>After</figcaption></figure> : null}
+          {r.afterUrl ? (
+            <figure>
+              <img src={r.afterUrl} alt="The drain after the fix" /><figcaption>After</figcaption>
+              {verifying ? <div className="scan" aria-hidden="true"><span>Reading after-photo</span></div> : null}
+            </figure>
+          ) : null}
         </div>
       ) : null}
 
@@ -64,19 +80,37 @@ export function Ticket({ r, children }: { r: Report; children?: ReactNode }) {
         </div>
       ) : null}
 
-      {v ? (
-        <div className="case-sec">
+      {verifying ? (
+        <div className="case-sec" aria-live="polite">
+          <span className="label">Checking the after-photo</span>
           <div className="checks">
-            {Object.entries(v.checks).map(([k, c]) => (
-              <div className="check-row" key={k}>
-                <Tick ok={c.ok} />
-                <div><b>{CHECK_LABEL[k] || k}</b><span>{c.detail}</span></div>
+            {ORDER.map((k, n) => (
+              <div className="check-row wait" style={delay(n)} key={k}>
+                <span className="spin" aria-hidden="true" />
+                <div><b>{CHECK_LABEL[k]}</b><span>{PENDING[k]}</span></div>
               </div>
             ))}
           </div>
-          <div className={`stamp ${v.verified ? '' : 'no'}`}>
+        </div>
+      ) : null}
+
+      {v ? (
+        <div className="case-sec verdict">
+          <div className="checks">
+            {ORDER.filter((k) => v.checks[k]).map((k, n) => (
+              <div className="check-row res" style={delay(n)} key={k}>
+                <Tick ok={v.checks[k].ok} i={n} />
+                <div><b>{CHECK_LABEL[k]}</b><span>{v.checks[k].detail}</span></div>
+              </div>
+            ))}
+          </div>
+          <div className="meter" role="img" aria-label={`${passed} of 3 checks passed`}>
+            {ORDER.map((k, n) => <i key={k} className={v.checks[k]?.ok ? 'ok' : 'no'} style={delay(n)} />)}
+            <span className="mono">{passed} of 3</span>
+          </div>
+          <div className={`stamp ${v.verified ? '' : 'no'}`} style={{ ['--d' as string]: '1.8s' }}>
             {v.verified ? 'Verified' : 'Rejected'}
-            <small>{v.verified ? 'three of three checks' : 'sent back to the crew'}</small>
+            <small>{v.verified ? 'three of three checks' : 'sent back to the crew, one level up'}</small>
           </div>
         </div>
       ) : null}
