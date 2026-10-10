@@ -50,7 +50,7 @@ export default function App() {
       </main>
       <footer className="foot">
         <div className="wrap">
-          <p>Nikasi closes a ticket only when it sees a clear drain. Built solo for the AWS Environmental Hacks, Heat and Water track.</p>
+          <p>Nikasi closes a ticket only when it sees a clear drain. Built by team Code Nirvana for the AWS Environmental Hacks, Heat and Water track.</p>
           <p>AWS Step Functions &middot; Lambda &middot; Rekognition &middot; Polly &middot; DynamoDB &middot; S3 &middot; API Gateway &middot; Amplify. Map &copy; OpenStreetMap contributors.</p>
         </div>
       </footer>

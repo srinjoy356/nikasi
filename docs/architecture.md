@@ -61,9 +61,9 @@ Escalation ladder: Junior Engineer, Assistant Engineer, Executive Engineer, Ward
 
 ## Why the model only describes
 
-On real drain photos the 2.2B-parameter model gave the same structured answer for every image and said "yes" to
-every yes/no question, but wrote accurate one-sentence descriptions. So it writes the sentence, code reads it for
-signals, and Rekognition is the cross-check. The model cannot approve, close, dispatch or escalate anything.
+On four test photos the 2.2B-parameter model scored every one of them severity 3, including a flooded street with
+no drain in frame, and was yes-biased on yes/no questions. Its one-sentence descriptions were true but sometimes
+incomplete. So it writes the sentence, code reads it for signals, and Rekognition is the cross-check. The model cannot approve, close, dispatch or escalate anything.
 
 ## Security model for this prototype
 

@@ -1,0 +1,66 @@
+[
+  {
+    "photo": "gutter-choked-with-plastic.jpg",
+    "describe": "A black pipe is filled with garbage and debris.",
+    "describe_s": 35.4,
+    "scorer": {
+      "severity": 3,
+      "blockage": "plastic_litter",
+      "blocked": true,
+      "water_standing": true
+    },
+    "yesno": {
+      "garbage": "yes",
+      "mud": "yes",
+      "water": "yes"
+    }
+  },
+  {
+    "photo": "choked-gutter-in-ghana.jpg",
+    "describe": "A narrow waterway with a tree next to it.",
+    "describe_s": 35.2,
+    "scorer": {
+      "severity": 3,
+      "blockage": "plastic_litter",
+      "blocked": true,
+      "water_standing": true
+    },
+    "yesno": {
+      "garbage": "yes",
+      "mud": "yes",
+      "water": "yes"
+    }
+  },
+  {
+    "photo": "india-chennai-monsoon-01-3058208937.jpg",
+    "describe": "A man is walking through a flooded street with a truck and a motorcycle.",
+    "describe_s": 36.1,
+    "scorer": {
+      "severity": 3,
+      "blockage": "silt",
+      "blocked": true,
+      "water_standing": true
+    },
+    "yesno": {
+      "garbage": "no",
+      "mud": "no",
+      "water": "yes"
+    }
+  },
+  {
+    "photo": "gutter-with-less-plastic.jpg",
+    "describe": "A man is standing next to a water pipe on the side of the road.",
+    "describe_s": 36.1,
+    "scorer": {
+      "severity": 3,
+      "blockage": "plastic_litter",
+      "blocked": true,
+      "water_standing": true
+    },
+    "yesno": {
+      "garbage": "yes",
+      "mud": "yes",
+      "water": "yes"
+    }
+  }
+]

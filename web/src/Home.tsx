@@ -112,8 +112,8 @@ export function Home({ go }: { go: (tab: string) => void }) {
         <section className="band">
           <p className="quote reveal">The model describes. <em>Code decides.</em> A person approves.</p>
           <p className="lede reveal" style={{ marginTop: 18, color: 'var(--ink-2)', maxWidth: '58ch', transitionDelay: '120ms' }}>
-            On real drain photos a small vision model gave the same answer to every question, but wrote an accurate sentence about every photo.
-            So it only writes the sentence. Severity, risk, deadlines and the verification rules are plain, tested code, and the only thing
+            On our test photos a small vision model scored every one of them a three, even a flooded street with no drain in it, but its
+            sentences were true. So it only writes the sentence, and a second reader checks it. Severity, risk, deadlines and the verification rules are plain, tested code, and the only thing
             that can send a crew is a human.
           </p>
         </section>

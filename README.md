@@ -2,7 +2,7 @@
 
 **A drain-clearing agent that does not close a ticket until it sees a clear drain.**
 
-Built solo for the WeMakeDevs x AWS *Environmental Hacks* (Heat and Water track), Oct 8-11, 2026.
+Built by team **Code Nirvana** (Srinjoy Roy and Rishita Roy) for the WeMakeDevs x AWS *Environmental Hacks* (Heat and Water track), Oct 8-11, 2026.
 *Nikasi* (निकासी) is the Hindi word for drainage and outflow.
 
 **Live app:** https://main.d2gfp9oihzn5ah.amplifyapp.com &nbsp;|&nbsp; **Code:** https://github.com/srinjoy356/nikasi &nbsp;|&nbsp; **Architecture:** [docs/architecture.md](docs/architecture.md) &nbsp;|&nbsp; **Demo script:** [docs/demo-script.md](docs/demo-script.md)
@@ -53,15 +53,18 @@ Adapter (runs the model server inside Lambda), and the AWS CDK.
 
 ## An honest note on the model choice
 
-This AWS account is new and Amazon Bedrock refuses every invocation ("Operation not allowed"). I opened a support
+This AWS account is new and Amazon Bedrock refuses every invocation ("Operation not allowed"). We opened a support
 case, and AWS Support replied after a specialist review that they could not grant expanded Bedrock access on this
-account, an account-level decision they could not override. So this is not a delay I could wait out, and Nikasi runs an **open-weight model of its own**: SmolVLM2-2.2B (Apache-2.0) served by
-llama.cpp inside a Lambda container. I measured it before building on it:
+account, an account-level decision they could not override. So this is not a delay we could wait out, and Nikasi runs an **open-weight model of its own**: SmolVLM2-2.2B
+(Apache-2.0) served by llama.cpp inside a Lambda container. We measured it before building on it:
 
-- Asked to *score* a drain as JSON, it gave nearly the same answer for every photo. Asked yes/no questions, it
-  said "yes" to everything, even for a clean street. **It is not trustworthy as a judge.**
-- Asked to *describe* a photo in one sentence, it was accurate ("a polluted river with garbage floating in it",
-  "a black car parked next to a puddle on the street").
+- Asked to *score* four photos (a plastic-packed gutter, a lightly littered one, a choked one, and a flooded street
+  with no drain in frame), it gave **severity 3 to all four**, "blocked" and "water standing" every time. On yes/no
+  questions it said garbage, mud and water for all three gutters. **It cannot tell a bad drain from a mild one.**
+- Asked to *describe* each photo in one sentence, its sentences were true but not always complete: "a black pipe
+  is filled with garbage and debris", "a man is walking through a flooded street", but also "a narrow waterway with
+  a tree next to it" for a gutter full of litter. That is why a second reader sits beside it.
+  Reproduce with `scripts/measure_model.py`; the raw output is in `docs/measurement/`.
 
 So the model only writes the description, shown to the officer as "what the model sees". Code reads it for signals
 and cross-checks with Rekognition. If the model is cold or unavailable, triage falls back to Rekognition alone and

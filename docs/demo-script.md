@@ -23,7 +23,7 @@ spoken line, the real clock visible.
 | 1:10-1:30 | Tap "Approve dispatch". Cut to Step Functions: the execution moves from Wait for dispatch to Wait for crew fix | "Nothing goes to a crew until a person approves. The ticket lives in a Step Functions workflow that waits for people." | Step Functions graph |
 | 1:30-2:05 | Crew page: take the after-photo. The ticket shows three checks: drain clear, at the spot, after dispatch. Ticket closes | "The ticket closes only when three independent checks pass on the new photo." | Step Functions Verify state |
 | 2:05-2:40 | Second ticket with fast timers, nobody dispatches: owner climbs Junior Engineer, Assistant, Executive, Commissioner, then "Unresolved". Step Functions graph shows the escalation loop; SNS email | "If anyone misses a deadline it escalates, and every step is on the record. No ticket quietly disappears." | Step Functions escalation path, SNS email |
-| 2:40-3:00 | Stats tile and services list | "Built solo this weekend on AWS. Nikasi does not close a ticket until it sees a clear drain." | services list on screen |
+| 2:40-3:00 | Stats tile and services list | "Built this weekend by team Code Nirvana on AWS. Nikasi does not close a ticket until it sees a clear drain." | services list on screen |
 
 ## If something goes wrong during a take
 

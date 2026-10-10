@@ -1,20 +1,24 @@
 # The Ticket That Will Not Close
 
-**Summary line (for the Builder Center card):** A solo build of a drain-clearing agent whose one rule is that a complaint stays open until a new photo proves the drain is clear, and what a vision model I could not trust taught me about letting code decide.
+**Summary line (for the Builder Center card):** We built a drain-clearing agent whose one rule is that a complaint stays open until a new photo proves the drain is clear, and found out what a vision model we could not trust taught us about letting code decide.
 
 *Tags: #aws-step-functions #aws-lambda #amazon-rekognition #amazon-polly #amazon-dynamodb #aws-cdk #aws-community-builders*
 
 ---
 
-I showed a vision model a photograph of a wet alley with a parked car and asked: is there garbage in this image? It said yes. I showed it a river of floating plastic and asked the same thing. It said yes. I asked it to score four different drains from one to five, as structured JSON. It gave all four a three, with standing water, and no blockage.
+We showed a vision model four photographs and asked it to score each drain from one to five. A gutter packed with plastic: three. A gutter with a few scraps in it: three. A choked gutter beside a road: three. A flooded street with no drain anywhere in the frame: three.
 
-That is the reason this post is worth reading. Everything else I built, the workflow, the verification, the escalation, the AWS wiring, worked more or less as planned. The interesting part is what I did once I knew the part I had built everything around could not be trusted, and the three other times the real world told me my tests were lying.
+![Figure 1. One model, three jobs, four photographs. Every photo got severity 3 from the scorer, and the sentences it wrote were true but not always useful.](figures/fig-model-measurement.png)
 
-The thing I built is called Nikasi, Hindi for drainage. It is live at [main.d2gfp9oihzn5ah.amplifyapp.com](https://main.d2gfp9oihzn5ah.amplifyapp.com), the source is at [github.com/srinjoy356/nikasi](https://github.com/srinjoy356/nikasi), and it was built solo during the AWS and WeMakeDevs Environmental Hacks.
+That is the reason this post is worth reading. Everything else we built, the workflow, the verification, the escalation, the AWS wiring, worked more or less as planned. The interesting part is what we did once we knew that the part we had designed everything around could not be trusted, and the times the real world told us our tests were lying.
+
+The thing we built is called Nikasi, Hindi for drainage. It is live at [main.d2gfp9oihzn5ah.amplifyapp.com](https://main.d2gfp9oihzn5ah.amplifyapp.com), the source is at [github.com/srinjoy356/nikasi](https://github.com/srinjoy356/nikasi), and it was built by Code Nirvana for the AWS and WeMakeDevs Environmental Hacks.
 
 **The short version:** a citizen photographs a blocked drain. The system ranks it against the rain forecast for that exact spot, a person approves a crew, and the ticket closes only when a new photo passes three independent checks. If anyone misses a deadline, it climbs four levels of the ward hierarchy.
 
 **In plain words.** Imagine reporting a leaking pipe to your housing society. Someone marks it "resolved" on a list, and the pipe is still leaking. Nikasi does one thing about that: a complaint only counts as fixed when a fresh photo, taken at the same place after the crew was sent, shows it is fixed. Otherwise it stays open and gets louder.
+
+![Figure 2. The citizen's side, on a phone: a photo, a pin, and a ticket that updates as it moves. [CAPTURE: three phone screenshots side by side: the report page with a photo and pin, the ticket reading "Reading the photo", and the same ticket after triage.]](figures/fig-phone-flow.png)
 
 ---
 
@@ -22,13 +26,15 @@ The thing I built is called Nikasi, Hindi for drainage. It is live at [main.d2gf
 
 Every monsoon, the street that floods is the street whose drain was reported weeks earlier. Reporting apps exist. The failure is always the same: the ticket gets marked resolved and the drain is still full of plastic. And the ward officer has hundreds of open complaints and nothing to say which twelve to clear before Thursday's rain.
 
+![Figure 3. [CAPTURE: your own photo of a real blocked drain near you, with one line on where and when. This is the problem, in one picture.]](figures/fig-real-drain.png)
+
 So the product is not a reporting form. It is a ranking, and a refusal to forget. Those two ideas, rank by the rain that is coming and do not close without proof, decided everything below.
 
-![Figure 1. The officer desk ranks open drains by risk against the 48-hour rain forecast, with a morning brief read aloud in Hindi or English.](figures/fig-officer-desk.png)
+![Figure 4. The officer desk ranks open drains by risk against the 48-hour rain forecast, with a morning brief read aloud in Hindi or English.](figures/fig-officer-desk.png)
 
 ## Part two: a ticket is a workflow, not a row
 
-My first instinct was a table with a status column and a scheduler that wakes up to check deadlines. I did not write the scheduler.
+Our first instinct was a table with a status column and a scheduler that wakes up to check deadlines. We did not write the scheduler.
 
 Each ticket is one AWS Step Functions execution. When it needs a person, it stops at a state that uses `waitForTaskToken`. The Lambda stores the token on the ticket, and the officer's click calls `SendTaskSuccess` with it. The task timeout is the escalation timer:
 
@@ -41,35 +47,44 @@ new tasks.LambdaInvoke(this, id, {
 waitDispatch.addCatch(escalate, { errors: ['States.Timeout'] });
 ```
 
-When the timer fires, the catch moves the ticket up one rung: Junior Engineer, Assistant Engineer, Executive Engineer, Ward Commissioner. I tested the whole ladder by shrinking the deadlines from hours to seconds. A ticket nobody touched went from the first owner to the last, and closed as unresolved, in 124 seconds. Every step is written to the ticket's ledger and emailed through SNS with a link straight to it.
+When the timer fires, the catch moves the ticket up one rung: Junior Engineer, Assistant Engineer, Executive Engineer, Ward Commissioner. We tested the whole ladder by shrinking the deadlines from hours to seconds. A ticket nobody touched went from the first owner to the last, and closed as unresolved, in 124 seconds. Every step is written to the ticket's ledger and sent to an SNS topic that emails the officer with a link straight to the ticket.
+
+![Figure 5. One ticket as a Step Functions execution. [CAPTURE: AWS console, Step Functions, state machine "nikasi-ticket-workflow", open an execution that went through a wait state and an escalation, screenshot the graph view.]](figures/fig-stepfunctions.png)
+
+![Figure 6. An escalated ticket and the email it sent. [CAPTURE: the ticket showing the ladder with a later owner highlighted, and, next to it, the escalation email in your inbox. Crop out anything personal.]](figures/fig-escalation.png)
 
 Between waits the workflow costs nothing, because between waits it does nothing.
 
 ## Part three: Bedrock said no
 
-My plan was an agent on Amazon Bedrock to read the photos. My account was new and still under AWS's verification, and every call came back as `ValidationException: Operation not allowed`. Nova, Qwen and gpt-oss alike. I could list 124 models and invoke none.
+Our plan was an agent on Amazon Bedrock to read the photos. The account was new, and every call came back as `ValidationException: Operation not allowed`. Nova, Qwen and gpt-oss alike. We could list 124 models and invoke none.
 
-I did not wait. I opened a support case, and within a day AWS Support came back after a specialist review: they could not grant expanded Bedrock access on this account, an account-level risk decision they could not override, and they pointed me to AWS Educate and AWS Sales for programs better suited to events like this. Whatever the reason, the answer was no, and by then the alternative was already running. If I had been waiting for yes, there would be no project.
+![Figure 7. The error, on every model. [CAPTURE: a terminal showing one failed call, for example `aws bedrock-runtime converse --model-id us.amazon.nova-lite-v1:0 ...` returning "Operation not allowed". Crop your account ID.]](figures/fig-bedrock-denied.png)
 
-So I ran a model myself: SmolVLM2-2.2B, which is Apache-2.0, served by llama.cpp inside a Lambda container image through the AWS Lambda Web Adapter. A 4.5 GB image, behind an IAM-protected function URL that only the workflow's Lambda may call.
+We did not wait. We opened a support case, and within a day AWS Support came back after a specialist review: they could not grant expanded Bedrock access on this account, an account-level risk decision they could not override, and they pointed us to AWS Educate and AWS Sales for programs better suited to events like this. Whatever the reason, the answer was no, and by then the alternative was already running. If we had been waiting for yes, there would be no project.
 
-It failed three times before it worked, and each time the real constraint was one I had not thought to check:
+![Figure 8. AWS Support's reply. [CAPTURE: your screenshot of the reply, cropped to the message body. Remove the agent's name and any account details.]](figures/fig-aws-support.png)
 
-- **I assumed 10 GB of memory.** New accounts are capped at 3,008 MB per function, about two CPUs. The deploy was rejected with a clear message, and I re-measured the model at that size.
-- **`Permission denied` on the model file.** Lambda runs as an unprivileged user. My Dockerfile used `ADD --chmod=0644` to fetch the model, and that mode also landed on the `/models` directory, removing its execute bit. The files were readable and the folder was not. Running the image locally as root had hidden it. One `chmod 755` fixed it.
-- **The account allows ten concurrent executions in total.** A triage holds two for about thirty seconds, so seeding a dozen photos at once got my own API throttled. I now space them out.
+So we ran a model ourselves: SmolVLM2-2.2B, which is Apache-2.0, served by llama.cpp inside a Lambda container image through the AWS Lambda Web Adapter. A 4.5 GB image, behind an IAM-protected function URL that only the workflow's Lambda may call.
+
+It failed three times before it worked, and each time the real constraint was one we had not thought to check:
+
+- **We assumed 10 GB of memory.** New accounts are capped at 3,008 MB per function, about two CPUs. The deploy was rejected with a clear message, and we re-measured the model at that size.
+- **`Permission denied` on the model file.** Lambda runs as an unprivileged user. Our Dockerfile used `ADD --chmod=0644` to fetch the model, and that mode also landed on the `/models` directory, removing its execute bit. The files were readable and the folder was not. Running the image locally as root had hidden it. One `chmod 755` fixed it.
+- **The account allows ten concurrent executions in total.** A triage holds two for about thirty seconds, so seeding a dozen photos at once got our own API throttled. We now space them out.
 
 ## Part four: the model describes, code decides
 
-Before building on the model, I measured it. This is where the opening came from.
+Before building on the model, we measured it. This is where the opening came from, and the script is in the repository so anyone can repeat it.
 
-As a **scorer**, asked for severity, blockage type and a boolean as JSON, it returned the same answer for every drain. As a **yes/no oracle**, it said yes to every question on every photo, including a clean street. As a **describer**, asked for one sentence, it was accurate:
+As a **scorer**, asked for severity, blockage type and two booleans as JSON, it gave every one of four photos a severity of three, "blocked", "water standing". That includes a flooded street with no drain in it, and a gutter with barely any plastic. As a **yes/no oracle**, it said garbage, mud and water for all three gutters, and was right to say no to garbage and mud on the street. As a **describer**, asked for one sentence, its sentences were true:
 
-> "A polluted river with garbage floating in it."
-> "A black car is parked next to a puddle on the street."
-> "A man is riding a bicycle through a flooded street."
+> "A black pipe is filled with garbage and debris."
+> "A man is walking through a flooded street with a truck and a motorcycle."
 
-So the model only writes the sentence. My code reads it for signals, and fuses that with Amazon Rekognition's labels, half and half:
+But true is not the same as complete. It described a gutter full of litter as "a narrow waterway with a tree next to it". Correct, and useless for ranking drains.
+
+So the model only writes the sentence. Our code reads it for signals, and fuses that with Amazon Rekognition's labels, half and half:
 
 ```python
 litter = any(w in text for w in ("garbage", "trash", "plastic", "litter", "debris", ...))
@@ -79,7 +94,7 @@ final = round(0.5 * vlm_severity + 0.5 * rekognition_severity)   # model failed?
 
 Rekognition alone was not enough either. On a wide street photo it labelled the scene, City, Road, Puddle, Drain, and missed the litter entirely. Two weak readers that are wrong in different places are better than one.
 
-One detail I did not need but enjoyed: the first request on an image takes 20 to 26 seconds on CPU, because the image has to be encoded. In my local tests, follow-up questions about the same image took under a second, because llama.cpp reuses the cached encoding. The model cannot approve, dispatch, close or escalate anything. It is a witness, not a judge.
+One detail we did not need but enjoyed: the first request on an image takes 20 to 26 seconds on CPU, because the image has to be encoded. In our local tests, follow-up questions about the same image took under a second, because llama.cpp reuses the cached encoding. The model cannot approve, dispatch, close or escalate anything. It is a witness, not a judge.
 
 ## Part five: closing means proof
 
@@ -92,25 +107,37 @@ fresh    = after_taken_at > dispatched_at
 verified = cleared and at_place and fresh
 ```
 
-The drain has to read as clear. The photo has to be within 75 metres of the reported spot. And it has to be newer than the dispatch, so an old photo or one sent before the crew arrived does not count. If any check fails, the ticket goes back to the crew and up a level, and the screen says which check failed and why. A passing ticket gets a stamp. I used a stamp, and not a green tick, because a tick is a state and a stamp is a decision somebody signed.
+The drain has to read as clear. The photo has to be within 75 metres of the reported spot. And it has to be newer than the dispatch, so an old photo or one sent before the crew arrived does not count. If any check fails, the ticket goes back to the crew and up a level, and the screen says which check failed and why.
 
-[FIGURE 2 TO ADD AFTER YOUR PHOTOS: screenshot of a verified ticket whose before and after photos are the SAME drain, showing the three ticked checks and the stamp. Caption: "Figure 2. A verified ticket: the three checks and the stamp, with the before and after photos together." Do not use sample photos for this one; they are different places and would mislead.]
+We spent real time on this moment, because it is the whole product. While the photo is being read, a scan runs over it and three checks spin. They resolve one by one, each drawing its own tick. A meter fills, a stamp comes down, and a before-and-after slider sweeps across the two photos. We used a stamp, and not a green tick, because a tick is a state and a stamp is a decision somebody signed.
+
+![Figure 9. A verified ticket: three ticked checks, the meter, the stamp, and the before and after photos. [CAPTURE: a verified ticket whose before and after photos are the SAME drain. Do not use the sample photos for this one; they are different places and would mislead.]](figures/fig-verified-ticket.png)
+
+![Figure 10. The same screen when a fix is rejected. [CAPTURE: a ticket where the after-photo still shows the blockage: the cross, "2 of 3", the orange stamp "Rejected, sent back to the crew".]](figures/fig-rejected-ticket.png)
 
 ## Part six: the bugs that passed every test
 
 This is the part that still stings.
 
-**CORS.** My end-to-end test script created a report, dispatched it, uploaded an after-photo and watched the ticket close, in about fifteen seconds. Green. Then I opened the app in a browser and every request failed. My script used Python's `urllib`, which never sends the CORS preflight request a browser sends first. My API Gateway used a `$default` route, so the preflight was forwarded to my Lambda, whose router answered 404. The gateway adds the CORS headers, but the function still has to return a 2xx. Four lines in the handler.
+**CORS.** Our end-to-end test script created a report, dispatched it, uploaded an after-photo and watched the ticket close, in about fifteen seconds. Green. Then we opened the app in a browser and every request failed. The script used Python's `urllib`, which never sends the CORS preflight request a browser sends first. Our API Gateway used a `$default` route, so the preflight was forwarded to our Lambda, whose router answered 404. The gateway adds the CORS headers, but the function still has to return a 2xx. Four lines in the handler.
 
-**The ghost ticket.** I reset the demo data while a workflow was still running. DynamoDB's `update_item` creates an item if it does not exist, so the still-running workflow quietly re-created a ticket that had a few fields and no status, no location, nothing else. The next call to list tickets crashed on it with a 500. Worse, triage for other tickets crashed when it tried to count the nearby reports and found a record with no latitude. Every update now carries `attribute_exists(reportId)`, so a deleted ticket fails loudly instead of coming back as a corpse, and the list skips any record that is not shaped like a ticket.
+**The ghost ticket.** We reset the demo data while a workflow was still running. DynamoDB's `update_item` creates an item if it does not exist, so the still-running workflow quietly re-created a ticket that had a few fields and no status, no location, nothing else. The next call to list tickets crashed on it with a 500. Worse, triage for other tickets crashed when it tried to count the nearby reports and found a record with no latitude. Every update now carries `attribute_exists(reportId)`, so a deleted ticket fails loudly instead of coming back as a corpse, and the list skips any record that is not shaped like a ticket.
 
-**The map.** I picked a nicely muted free basemap. It rendered the words "API KEY REQUIRED" across the screen, which my tests could not see, because tests do not look at maps. I switched back to the standard OpenStreetMap tiles and tinted them to match.
+**The map.** We picked a nicely muted free basemap. It rendered the words "API KEY REQUIRED" across the screen, which our tests could not see, because tests do not look at maps. We switched back to the standard OpenStreetMap tiles and tinted them to match.
+
+![Figure 11. The map that our tests could not see.](figures/fig-map-key-required.png)
 
 None of the three would have been caught by more unit tests of the same kind. All were caught by looking at the real thing.
+
+**The alarm that earned its keep.** On the third day our $20 budget alarm emailed us: $11.82 actual. Nikasi's three Lambdas had cost under a dollar between them, which we checked from invocation counts and billed GB-seconds before blaming our own keep-warm schedule. The rest was a database cluster on the same account that no part of Nikasi uses, two large instances running around the clock for roughly $13 a day. We stopped and deleted it. The lesson is the oldest one: set the alarm before you build, and when it fires, look at what is running before you suspect your own code.
+
+![Figure 12. The budget alert. [CAPTURE: your screenshot of the alert email, cropped; remove the account ID.]](figures/fig-budget-alert.png)
 
 ## What it runs on
 
 The AWS architecture is a set of boundaries, not a list of logos.
+
+![Figure 13. How a ticket moves through the system.](figures/fig-architecture.png)
 
 - **AWS Step Functions** holds each ticket's lifecycle and its deadlines, so no scheduler exists to forget anything.
 - **AWS Lambda** runs three things with different failure modes: the API, the workflow tasks, and the vision model.
@@ -126,32 +153,36 @@ The AWS architecture is a set of boundaries, not a list of logos.
 
 AWS open-source pieces: AWS Lambda Powertools for Python (routing and logging), the AWS Lambda Web Adapter (running the model server in Lambda), and the CDK.
 
-Cost to date: [fill in from Cost Explorer. It lags by about a day, so check it before you publish]. A $20 budget alarm is set. Restraint mattered as much as the architecture. I did not build logins, a native app, SMS (Indian numbers need sender registration), or any integration with a real municipal system, and I say so in the app.
+Cost to date for Nikasi: [fill in from the AWS Budgets dashboard after the stray database is gone]. Restraint mattered as much as the architecture. We did not build logins, a native app, SMS (Indian numbers need sender registration), or any integration with a real municipal system, and the app says so.
 
 ## What the evidence supports today
 
 - **Tests.** 14 unit tests cover the decisions: severity, risk, deadlines, the three checks, caption reading, and the not-a-drain flag. They run without AWS.
-- **End to end.** I ran 11 openly licensed drain photos from Wikimedia Commons (CC BY and CC BY-SA, credited in the repo) through the live system, and exercised the verified path, the rejected-fix path, and the full escalation ladder with shortened deadlines.
+- **End to end.** We ran 11 openly licensed drain photos from Wikimedia Commons (CC BY and CC BY-SA, credited in the repo) through the live system, and exercised the verified path, the rejected-fix path, and the full escalation ladder with shortened deadlines. [Update: add a sentence about the photos you took yourselves.]
 - **Timing.** A warm triage takes about 30 seconds. The first photo after the model has been idle takes about two minutes.
 
-What I am not claiming. I have not measured accuracy across a labelled set of drains, so there is no accuracy number in this post and I would distrust one. [Update: replace with your own sentence about photos you took on your own street, if you add them.] Until then, the photos are not from the place the app is for. The rain figure on some tickets is simulated, and the app labels it "simulated" next to the number. The officer side is a simulation of a ward desk, not an integration, and there is no login in this prototype. I have not shown that this would save any ward any time.
+What we are not claiming. Figure 1 is four photographs. It is a demonstration, not a benchmark, and we have not measured accuracy across a labelled set of drains, so there is no accuracy number in this post and we would distrust one. Until we add our own photos, most of the images are not from the place the app is for. The rain figure on some tickets is simulated, and the app labels it "simulated" next to the number. The officer side is a simulation of a ward desk, not an integration, and there is no login in this prototype. We have not shown that this would save any ward any time.
 
-## Three things I would tell myself on day one
+## Three things we would tell ourselves on day one
 
-**Measure the model before you design around it.** An afternoon of asking a model simple questions on six photos told me more than any amount of prompt tuning would have. If it cannot discriminate, do not hand it a decision.
+**Measure the model before you design around it.** An afternoon of asking a model simple questions on a few photos told us more than any amount of prompt tuning would have. If it cannot discriminate, do not hand it a decision.
 
-**Test through the browser, not just beside it.** A script that talks to your API is not a user. The two bugs that cost me the most time lived exactly in the gap.
+**Test through the browser, not just beside it.** A script that talks to your API is not a user. The two bugs that cost the most time lived exactly in the gap.
 
 **A missing record should fail loudly.** A write that quietly creates what it expected to find is a bug that waits for a reset to show up.
 
-## What I would do next
+## What we would do next
 
 Put Amazon Cognito in front of the officer and crew screens. Move the photo reader to a Bedrock Nova model on an account that has access, which would keep everything on AWS and is a small swap. This account will not get it: AWS has said so. And replace the sample photos and the simulated ward desk with a real ward's complaints.
 
-If you are building something that acts in the physical world, I would like to hear one detail of your design: what is your proof that the loop actually closed?
+If you are building something that acts in the physical world, we would like to hear one detail of your design: what is your proof that the loop actually closed?
 
-Try Nikasi at [main.d2gfp9oihzn5ah.amplifyapp.com](https://main.d2gfp9oihzn5ah.amplifyapp.com). No login: open the Officer desk and approve a dispatch on any ticket, then follow it on the Crew page. The code is at [github.com/srinjoy356/nikasi](https://github.com/srinjoy356/nikasi).
+Try Nikasi at [main.d2gfp9oihzn5ah.amplifyapp.com](https://main.d2gfp9oihzn5ah.amplifyapp.com). No login: open the Officer desk and approve a dispatch on any ticket, then follow it on the Crew page. The code is at [github.com/srinjoy356/nikasi](https://github.com/srinjoy356/nikasi), and the model measurement behind Figure 1 is in `scripts/measure_model.py`.
 
-Claude Code (Anthropic) assisted with implementation, debugging and drafting. I chose the problem, the design and the safety rules, ran the measurements described here, and I am responsible for the claims and the code.
+## The team
 
-Any opinions in this article are those of the individual author and may not reflect the opinions of AWS.
+Code Nirvana is Srinjoy Roy and Rishita Roy. [ADD ONE OR TWO SENTENCES EACH ON WHAT EACH OF YOU DID: for example, who chose the problem, who gathered and tested the field photos, who recorded the demo, who handled the AWS account.]
+
+Claude Code (Anthropic) assisted with implementation, debugging and drafting. We chose the problem, the design and the safety rules, ran the measurements described here, and we are responsible for the claims and the code.
+
+Any opinions in this article are those of the individual authors and may not reflect the opinions of AWS.
