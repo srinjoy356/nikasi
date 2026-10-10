@@ -181,7 +181,7 @@ Try Nikasi at [main.d2gfp9oihzn5ah.amplifyapp.com](https://main.d2gfp9oihzn5ah.a
 
 ## The team
 
-Code Nirvana is Srinjoy Roy and Rishita Roy. [ADD ONE TRUE SENTENCE EACH ON WHAT YOU DID. Only write what actually happened.]
+Code Nirvana is Srinjoy Roy and Rishita Roy.
 
 Claude Code (Anthropic) assisted with implementation, debugging and drafting. We chose the problem, the design and the safety rules, ran the measurements described here, and we are responsible for the claims and the code.
 

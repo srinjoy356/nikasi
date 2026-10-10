@@ -78,9 +78,9 @@ export function ReportPage() {
             <div className="sheet-b" style={{ display: 'grid', gap: 22 }}>
               <div className="field">
                 <span className="label">1 &middot; Photo</span>
-                <input ref={fileRef} type="file" accept="image/*" capture="environment" hidden onChange={(e) => onFile(e.target.files?.[0])} />
+                <input ref={fileRef} type="file" accept="image/*" hidden onChange={(e) => onFile(e.target.files?.[0])} />
                 <button className={`viewfinder ${preview ? 'has' : ''}`} onClick={() => fileRef.current?.click()} aria-label="Take or choose a photo of the drain">
-                  {preview ? <img src={preview} alt="Your drain photo" /> : <span className="ph"><b>Take a photo</b><span>of the drain</span></span>}
+                  {preview ? <img src={preview} alt="Your drain photo" /> : <span className="ph"><b>Add a photo</b><span>take one now or pick from your gallery</span></span>}
                   <i /><i /><i /><i />
                 </button>
               </div>

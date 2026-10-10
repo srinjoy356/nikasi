@@ -61,7 +61,7 @@ export function CrewPage() {
               {current.status === 'AWAITING_FIX' ? (
                 <div className="dispatch">
                   <span className="label">After-photo</span>
-                  <input ref={fileRef} type="file" accept="image/*" capture="environment" hidden onChange={(e) => onFile(e.target.files?.[0])} />
+                  <input ref={fileRef} type="file" accept="image/*" hidden onChange={(e) => onFile(e.target.files?.[0])} />
                   <button className="btn primary" disabled={busy} onClick={() => fileRef.current?.click()}>{busy ? 'Uploading…' : <>Take the after-photo <span className="arrow">&rarr;</span></>}</button>
                   <label className="check"><input type="checkbox" checked={spot} onChange={(e) => setSpot(e.target.checked)} />Demo: pretend I am standing at the reported spot.</label>
                   {msg ? <p className="err" role="alert">{msg}</p> : null}
