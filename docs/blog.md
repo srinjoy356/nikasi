@@ -49,6 +49,8 @@ Between waits the workflow costs nothing, because between waits it does nothing.
 
 My plan was an agent on Amazon Bedrock to read the photos. My account was new and still under AWS's verification, and every call came back as `ValidationException: Operation not allowed`. Nova, Qwen and gpt-oss alike. I could list 124 models and invoke none.
 
+I did not wait. I opened a support case, and within a day AWS Support came back after a specialist review: they could not grant expanded Bedrock access on this account, an account-level risk decision they could not override, and they pointed me to AWS Educate and AWS Sales for programs better suited to events like this. Whatever the reason, the answer was no, and by then the alternative was already running. If I had been waiting for yes, there would be no project.
+
 So I ran a model myself: SmolVLM2-2.2B, which is Apache-2.0, served by llama.cpp inside a Lambda container image through the AWS Lambda Web Adapter. A 4.5 GB image, behind an IAM-protected function URL that only the workflow's Lambda may call.
 
 It failed three times before it worked, and each time the real constraint was one I had not thought to check:
@@ -144,7 +146,7 @@ What I am not claiming. I have not measured accuracy across a labelled set of dr
 
 ## What I would do next
 
-Put Amazon Cognito in front of the officer and crew screens. Use a Bedrock Nova model for the photo reader, if the account verification clears, which would keep everything on AWS. And replace the sample photos and the simulated ward desk with a real ward's complaints.
+Put Amazon Cognito in front of the officer and crew screens. Move the photo reader to a Bedrock Nova model on an account that has access, which would keep everything on AWS and is a small swap. This account will not get it: AWS has said so. And replace the sample photos and the simulated ward desk with a real ward's complaints.
 
 If you are building something that acts in the physical world, I would like to hear one detail of your design: what is your proof that the loop actually closed?
 

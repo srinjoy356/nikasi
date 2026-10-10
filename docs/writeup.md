@@ -45,8 +45,8 @@ AWS open-source tools: AWS Lambda Powertools for Python, the AWS Lambda Web Adap
 
 ## An honest note on the model
 
-My new AWS account has Amazon Bedrock blocked ("Operation not allowed" on every model, the new-account verification
-hold), so I ran an open-weight model myself: SmolVLM2-2.2B (Apache-2.0) with llama.cpp inside Lambda. I measured it
+My new AWS account has Amazon Bedrock blocked ("Operation not allowed" on every model). I asked AWS Support to review
+it and they declined expanded access on an account-level risk assessment, so I could not wait it out. I ran an open-weight model myself: SmolVLM2-2.2B (Apache-2.0) with llama.cpp inside Lambda. I measured it
 on real drain photos before relying on it. As a *scorer* it was useless: the same JSON for every photo, and "yes"
 to every yes/no question. As a *describer* it was accurate. So the model only writes a sentence, shown to the
 officer as "what the model sees"; code reads it for signals and cross-checks with Rekognition. If the model is cold

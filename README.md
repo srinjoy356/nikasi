@@ -53,8 +53,9 @@ Adapter (runs the model server inside Lambda), and the AWS CDK.
 
 ## An honest note on the model choice
 
-This AWS account is new and Amazon Bedrock refuses every invocation ("Operation not allowed", the new-account
-verification block), so Nikasi runs an **open-weight model of its own**: SmolVLM2-2.2B (Apache-2.0) served by
+This AWS account is new and Amazon Bedrock refuses every invocation ("Operation not allowed"). I opened a support
+case, and AWS Support replied after a specialist review that they could not grant expanded Bedrock access on this
+account, an account-level decision they could not override. So this is not a delay I could wait out, and Nikasi runs an **open-weight model of its own**: SmolVLM2-2.2B (Apache-2.0) served by
 llama.cpp inside a Lambda container. I measured it before building on it:
 
 - Asked to *score* a drain as JSON, it gave nearly the same answer for every photo. Asked yes/no questions, it
