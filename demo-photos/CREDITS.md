@@ -15,3 +15,12 @@ The sample drain photos in `demo-photos/` come from Wikimedia Commons under open
 | `open-gutter-choked.jpg` | Open Gutter choked.jpg | Fquasie | CC BY-SA 4.0 | [Commons](https://commons.wikimedia.org/wiki/File:Open_Gutter_choked.jpg) |
 | `plastic-waste-clogging-a-roadside-gutter-in-tamale.jpg` | Plastic Waste Clogging a Roadside Gutter in Tamale, Northern Ghana.jpg | Nimatu15 | CC BY-SA 4.0 | [Commons](https://commons.wikimedia.org/wiki/File:Plastic_Waste_Clogging_a_Roadside_Gutter_in_Tamale,_Northern_Ghana.jpg) |
 | `storm-drain-clogged-mid-city-new-orleans.jpg` | Storm Drain Clogged - Mid-City New Orleans.jpg | Bart Everson | CC BY 2.0 | [Commons](https://commons.wikimedia.org/wiki/File:Storm_Drain_Clogged_-_Mid-City_New_Orleans.jpg) |
+
+## The before-and-after pair (`demo-photos/pair/`)
+
+One storm drain in Newark, New Jersey, photographed before and after it was cleaned, used for the verified and rejected examples. Both photos are released under CC0.
+
+| File | Original title | Licence | Source |
+|---|---|---|---|
+| `newark-drain-before.jpg` | Drain in Newark Before Cleaning.jpg | CC0 | [Commons](https://commons.wikimedia.org/wiki/File:Drain_in_Newark_Before_Cleaning.jpg) |
+| `newark-drain-after.jpg` | This is After Cleaning The Drain in Newark.jpg | CC0 | [Commons](https://commons.wikimedia.org/wiki/File:This_is_After_Cleaning_The_Drain_in_Newark.jpg) |
