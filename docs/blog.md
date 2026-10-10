@@ -18,7 +18,7 @@ The thing we built is called Nikasi, Hindi for drainage. It is live at [main.d2g
 
 **In plain words.** Imagine reporting a leaking pipe to your housing society. Someone marks it "resolved" on a list, and the pipe is still leaking. Nikasi does one thing about that: a complaint only counts as fixed when a fresh photo, taken at the same place after the crew was sent, shows it is fixed. Otherwise it stays open and gets louder.
 
-![Figure 2. The citizen's side, on a phone: a photo, a pin, and a ticket that updates as it moves. [CAPTURE: three phone screenshots side by side: the report page with a photo and pin, the ticket reading "Reading the photo", and the same ticket after triage.]](figures/fig-phone-flow.png)
+![Figure 2. The citizen's side, on a real phone: a photo and a pin, a ticket reading "Reading photo", and the same ticket a minute later with a risk score, the model's sentence and a dispatch deadline. The photo is a CC0 sample; location details are blurred.](figures/fig-phone-flow.png)
 
 ---
 
