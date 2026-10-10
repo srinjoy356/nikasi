@@ -26,7 +26,7 @@ The thing we built is called Nikasi, Hindi for drainage. It is live at [main.d2g
 
 Every monsoon, the street that floods is the street whose drain was reported weeks earlier. Reporting apps exist. The failure is always the same: the ticket gets marked resolved and the drain is still full of plastic. And the ward officer has hundreds of open complaints and nothing to say which twelve to clear before Thursday's rain.
 
-![Figure 3. [CAPTURE: your own photo of a real blocked drain near you, with one line on where and when. This is the problem, in one picture.]](figures/fig-real-drain.png)
+![Figure 3. A street in Chennai during the monsoon, the day the drains cannot keep up. Photo: McKay Savage, CC BY 2.0, via Wikimedia Commons.](figures/fig-monsoon-street.jpg)
 
 So the product is not a reporting form. It is a ranking, and a refusal to forget. Those two ideas, rank by the rain that is coming and do not close without proof, decided everything below.
 
@@ -51,7 +51,7 @@ When the timer fires, the catch moves the ticket up one rung: Junior Engineer, A
 
 ![Figure 5. One ticket as a Step Functions execution. [CAPTURE: AWS console, Step Functions, state machine "nikasi-ticket-workflow", open an execution that went through a wait state and an escalation, screenshot the graph view.]](figures/fig-stepfunctions.png)
 
-![Figure 6. An escalated ticket and the email it sent. [CAPTURE: the ticket showing the ladder with a later owner highlighted, and, next to it, the escalation email in your inbox. Crop out anything personal.]](figures/fig-escalation.png)
+![Figure 6. The email an escalation sends, with a link straight to the ticket. [CAPTURE: the escalation email in your inbox, cropped; remove anything personal.]](figures/fig-escalation.png)
 
 Between waits the workflow costs nothing, because between waits it does nothing.
 
@@ -59,7 +59,7 @@ Between waits the workflow costs nothing, because between waits it does nothing.
 
 Our plan was an agent on Amazon Bedrock to read the photos. The account was new, and every call came back as `ValidationException: Operation not allowed`. Nova, Qwen and gpt-oss alike. We could list 124 models and invoke none.
 
-![Figure 7. The error, on every model. [CAPTURE: a terminal showing one failed call, for example `aws bedrock-runtime converse --model-id us.amazon.nova-lite-v1:0 ...` returning "Operation not allowed". Crop your account ID.]](figures/fig-bedrock-denied.png)
+![Figure 7. The same error, on three different models. Terminal output, with the account details left out.](figures/fig-bedrock-denied.png)
 
 We did not wait. We opened a support case, and within a day AWS Support came back after a specialist review: they could not grant expanded Bedrock access on this account, an account-level risk decision they could not override, and they pointed us to AWS Educate and AWS Sales for programs better suited to events like this. Whatever the reason, the answer was no, and by then the alternative was already running. If we had been waiting for yes, there would be no project.
 
@@ -111,9 +111,9 @@ The drain has to read as clear. The photo has to be within 75 metres of the repo
 
 We spent real time on this moment, because it is the whole product. While the photo is being read, a scan runs over it and three checks spin. They resolve one by one, each drawing its own tick. A meter fills, a stamp comes down, and a before-and-after slider sweeps across the two photos. We used a stamp, and not a green tick, because a tick is a state and a stamp is a decision somebody signed.
 
-![Figure 9. A verified ticket: three ticked checks, the meter, the stamp, and the before and after photos. [CAPTURE: a verified ticket whose before and after photos are the SAME drain. Do not use the sample photos for this one; they are different places and would mislead.]](figures/fig-verified-ticket.png)
+![Figure 9. A verified ticket: three ticked checks, the meter, the stamp, and the before and after photos. The photos are a real before-and-after pair of one storm drain in Newark, New Jersey (CC0, Wikimedia Commons), standing in for a field photo of an Indian drain.](figures/fig-verified-ticket.png)
 
-![Figure 10. The same screen when a fix is rejected. [CAPTURE: a ticket where the after-photo still shows the blockage: the cross, "2 of 3", the orange stamp "Rejected, sent back to the crew".]](figures/fig-rejected-ticket.png)
+![Figure 10. The same screen when a fix is rejected: the first check fails, the meter shows 2 of 3, and the ticket goes to the Assistant Engineer. To simulate a crew that did not clear the drain we re-submitted the before photo, which is why both halves of the slider show the same scene.](figures/fig-rejected-ticket.png)
 
 ## Part six: the bugs that passed every test
 
@@ -153,15 +153,15 @@ The AWS architecture is a set of boundaries, not a list of logos.
 
 AWS open-source pieces: AWS Lambda Powertools for Python (routing and logging), the AWS Lambda Web Adapter (running the model server in Lambda), and the CDK.
 
-Cost to date for Nikasi: [fill in from the AWS Budgets dashboard after the stray database is gone]. Restraint mattered as much as the architecture. We did not build logins, a native app, SMS (Indian numbers need sender registration), or any integration with a real municipal system, and the app says so.
+Cost to date for Nikasi: [fill in from the AWS Budgets dashboard, now that the stray database is deleted]. Restraint mattered as much as the architecture. We did not build logins, a native app, SMS (Indian numbers need sender registration), or any integration with a real municipal system, and the app says so.
 
 ## What the evidence supports today
 
 - **Tests.** 14 unit tests cover the decisions: severity, risk, deadlines, the three checks, caption reading, and the not-a-drain flag. They run without AWS.
-- **End to end.** We ran 11 openly licensed drain photos from Wikimedia Commons (CC BY and CC BY-SA, credited in the repo) through the live system, and exercised the verified path, the rejected-fix path, and the full escalation ladder with shortened deadlines. [Update: add a sentence about the photos you took yourselves.]
+- **End to end.** We ran 11 openly licensed drain photos from Wikimedia Commons (CC BY and CC BY-SA, credited in the repo) through the live system, and a real before-and-after pair of one storm drain (CC0) for the verified and rejected examples. We exercised the verified path, the rejected-fix path, and the full escalation ladder with shortened deadlines.
 - **Timing.** A warm triage takes about 30 seconds. The first photo after the model has been idle takes about two minutes.
 
-What we are not claiming. Figure 1 is four photographs. It is a demonstration, not a benchmark, and we have not measured accuracy across a labelled set of drains, so there is no accuracy number in this post and we would distrust one. Until we add our own photos, most of the images are not from the place the app is for. The rain figure on some tickets is simulated, and the app labels it "simulated" next to the number. The officer side is a simulation of a ward desk, not an integration, and there is no login in this prototype. We have not shown that this would save any ward any time.
+What we are not claiming. Figure 1 is four photographs. It is a demonstration, not a benchmark, and we have not measured accuracy across a labelled set of drains, so there is no accuracy number in this post and we would distrust one. Every photo in this post is an openly licensed sample, most of them not from the place the app is for. The rain figure on some tickets is simulated, and the app labels it "simulated" next to the number. The officer side is a simulation of a ward desk, not an integration, and there is no login in this prototype. We have not shown that this would save any ward any time.
 
 ## Three things we would tell ourselves on day one
 
@@ -181,7 +181,7 @@ Try Nikasi at [main.d2gfp9oihzn5ah.amplifyapp.com](https://main.d2gfp9oihzn5ah.a
 
 ## The team
 
-Code Nirvana is Srinjoy Roy and Rishita Roy. [ADD ONE OR TWO SENTENCES EACH ON WHAT EACH OF YOU DID: for example, who chose the problem, who gathered and tested the field photos, who recorded the demo, who handled the AWS account.]
+Code Nirvana is Srinjoy Roy and Rishita Roy. [ADD ONE TRUE SENTENCE EACH ON WHAT YOU DID. Only write what actually happened.]
 
 Claude Code (Anthropic) assisted with implementation, debugging and drafting. We chose the problem, the design and the safety rules, ran the measurements described here, and we are responsible for the claims and the code.
 
