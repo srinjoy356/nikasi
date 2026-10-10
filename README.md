@@ -130,6 +130,6 @@ docs/                 architecture, demo script, writeup, blog draft
 
 ## AI tools used
 
-Claude Code (Anthropic) wrote most of the code under my direction; I chose the problem, the design, the safety
-rules, and tested everything on real photos. The vision model is the open-weight SmolVLM2 (Apache-2.0) by
-Hugging Face; llama.cpp (MIT) serves it.
+Claude Code (Anthropic) wrote most of the code under our direction; we chose the problem, the design and the safety
+rules, and tested everything on openly licensed sample photos. The vision model is the open-weight SmolVLM2
+(Apache-2.0) by Hugging Face; llama.cpp (MIT) serves it.
