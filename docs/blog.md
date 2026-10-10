@@ -49,9 +49,9 @@ waitDispatch.addCatch(escalate, { errors: ['States.Timeout'] });
 
 When the timer fires, the catch moves the ticket up one rung: Junior Engineer, Assistant Engineer, Executive Engineer, Ward Commissioner. We tested the whole ladder by shrinking the deadlines from hours to seconds. A ticket nobody touched went from the first owner to the last, and closed as unresolved, in 124 seconds. Every step is written to the ticket's ledger and sent to an SNS topic that emails the officer with a link straight to the ticket.
 
-![Figure 5. One ticket as a Step Functions execution. [CAPTURE: AWS console, Step Functions, state machine "nikasi-ticket-workflow", open an execution that went through a wait state and an escalation, screenshot the graph view.]](figures/fig-stepfunctions.png)
+![Figure 5. One ticket as a Step Functions execution: the path a rejected fix takes, from the failed check back to waiting for the crew. The blue state is still running.](figures/fig-stepfunctions.png)
 
-![Figure 6. The email an escalation sends, with a link straight to the ticket. [CAPTURE: the escalation email in your inbox, cropped; remove anything personal.]](figures/fig-escalation.png)
+![Figure 6. The email an escalation sends, with a link straight to the ticket.](figures/fig-escalation.png)
 
 Between waits the workflow costs nothing, because between waits it does nothing.
 
@@ -63,7 +63,7 @@ Our plan was an agent on Amazon Bedrock to read the photos. The account was new,
 
 We did not wait. We opened a support case, and within a day AWS Support came back after a specialist review: they could not grant expanded Bedrock access on this account, an account-level risk decision they could not override, and they pointed us to AWS Educate and AWS Sales for programs better suited to events like this. Whatever the reason, the answer was no, and by then the alternative was already running. If we had been waiting for yes, there would be no project.
 
-![Figure 8. AWS Support's reply. [CAPTURE: your screenshot of the reply, cropped to the message body. Remove the agent's name and any account details.]](figures/fig-aws-support.png)
+![Figure 8. AWS Support's reply.](figures/fig-aws-support.png)
 
 So we ran a model ourselves: SmolVLM2-2.2B, which is Apache-2.0, served by llama.cpp inside a Lambda container image through the AWS Lambda Web Adapter. A 4.5 GB image, behind an IAM-protected function URL that only the workflow's Lambda may call.
 
@@ -131,7 +131,7 @@ None of the three would have been caught by more unit tests of the same kind. Al
 
 **The alarm that earned its keep.** On the third day our $20 budget alarm emailed us: $11.82 actual. Nikasi's three Lambdas had cost under a dollar between them, which we checked from invocation counts and billed GB-seconds before blaming our own keep-warm schedule. The rest was a database cluster on the same account that no part of Nikasi uses, two large instances running around the clock for roughly $13 a day. We stopped and deleted it. The lesson is the oldest one: set the alarm before you build, and when it fires, look at what is running before you suspect your own code.
 
-![Figure 12. The budget alert. [CAPTURE: your screenshot of the alert email, cropped; remove the account ID.]](figures/fig-budget-alert.png)
+![Figure 12. The budget alert.](figures/fig-budget-alert.png)
 
 ## What it runs on
 
@@ -153,7 +153,7 @@ The AWS architecture is a set of boundaries, not a list of logos.
 
 AWS open-source pieces: AWS Lambda Powertools for Python (routing and logging), the AWS Lambda Web Adapter (running the model server in Lambda), and the CDK.
 
-Cost to date for Nikasi: [fill in from the AWS Budgets dashboard, now that the stray database is deleted]. Restraint mattered as much as the architecture. We did not build logins, a native app, SMS (Indian numbers need sender registration), or any integration with a real municipal system, and the app says so.
+Restraint mattered as much as the architecture. We did not build logins, a native app, SMS (Indian numbers need sender registration), or any integration with a real municipal system, and the app says so.
 
 ## What the evidence supports today
 
