@@ -1,0 +1,115 @@
+1
+00:00:00,300 --> 00:00:05,091
+Every monsoon, the street that floods is the street whose drain was reported weeks ago.
+
+2
+00:00:05,141 --> 00:00:06,382
+The ticket said resolved.
+
+3
+00:00:06,432 --> 00:00:07,995
+The drain was never cleared.
+
+4
+00:00:08,045 --> 00:00:10,577
+We are Code Nirvana, and this is Nikasi:
+
+5
+00:00:10,627 --> 00:00:14,450
+a drain ticket that will not close until a photo says so.
+
+6
+00:00:15,300 --> 00:00:22,450
+A citizen photographs a blocked drain, and the phone adds the location.
+
+7
+00:00:22,500 --> 00:00:37,450
+A vision model running in AWS Lambda describes the photo, Amazon Rekognition labels it, and the rain forecast for that exact spot sets the risk.
+
+8
+00:00:38,300 --> 00:00:48,111
+The ward officer opens the desk and sees every open drain ranked against the rain that is coming.
+
+9
+00:00:48,161 --> 00:00:54,685
+Amazon Polly reads the morning brief aloud, in Hindi if you prefer.
+
+10
+00:00:54,735 --> 00:01:03,450
+Each ticket shows what the model saw, who owns it, and how long before it escalates.
+
+11
+00:01:04,300 --> 00:01:08,837
+Nothing goes to a crew without a person.
+
+12
+00:01:08,887 --> 00:01:21,450
+One click approves the dispatch, and the ticket's Step Functions workflow moves from waiting for the officer to waiting for the crew.
+
+13
+00:01:22,300 --> 00:01:29,026
+The crew clears the drain and takes a new photo.
+
+14
+00:01:29,076 --> 00:01:34,446
+The ticket closes only if three checks pass:
+
+15
+00:01:34,496 --> 00:01:48,674
+the drain reads as clear, the photo is within seventy-five metres of the spot, and it was taken after the dispatch.
+
+16
+00:01:48,724 --> 00:01:50,707
+Three of three.
+
+17
+00:01:50,757 --> 00:01:51,385
+Verified.
+
+18
+00:01:51,435 --> 00:01:55,450
+Before, and after, the same drain.
+
+19
+00:01:56,300 --> 00:02:01,017
+If anyone misses a deadline, the ticket climbs:
+
+20
+00:02:01,067 --> 00:02:07,572
+junior engineer, assistant, executive, ward commissioner, and every step is emailed.
+
+21
+00:02:07,622 --> 00:02:12,936
+We shortened the clock so you can watch it.
+
+22
+00:02:12,986 --> 00:02:25,450
+And if the new photo still shows the blockage, the fix is rejected and the ticket goes back, one level higher.
+
+23
+00:02:26,300 --> 00:02:27,553
+One honest note.
+
+24
+00:02:27,603 --> 00:02:34,505
+Amazon Bedrock is blocked on our new account, and AWS support reviewed it and said no.
+
+25
+00:02:34,555 --> 00:02:39,719
+So we ran an open-weight model inside Lambda, and we measured it.
+
+26
+00:02:39,769 --> 00:02:45,802
+It scored every test photo a three, even a flooded street with no drain.
+
+27
+00:02:45,852 --> 00:02:51,450
+So the model only writes a sentence, code decides, and a person approves.
+
+28
+00:02:52,300 --> 00:02:55,130
+Built on AWS by Code Nirvana.
+
+29
+00:02:55,180 --> 00:02:59,450
+The code and the live app are linked below.
