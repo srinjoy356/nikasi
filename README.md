@@ -5,7 +5,7 @@
 *Nikasi* (निकासी) is the Hindi word for drainage. Built by team **Code Nirvana** (Srinjoy Roy and Rishita Roy) for the
 WeMakeDevs x AWS *Environmental Hacks*, Heat and Water track, Oct 8-11, 2026.
 
-**[Open the live app](https://main.d2gfp9oihzn5ah.amplifyapp.com)** (no login) &nbsp;|&nbsp; [How it works](#what-it-does) &nbsp;|&nbsp; [Try it in three minutes](#try-it-in-three-minutes) &nbsp;|&nbsp; [Architecture](#where-aws-fits)
+**[Open the live app](https://main.d2gfp9oihzn5ah.amplifyapp.com)** (no login) &nbsp;|&nbsp; **[Watch the 3-minute demo](https://youtu.be/jVPzWqlObns)** &nbsp;|&nbsp; [How it works](#what-it-does) &nbsp;|&nbsp; [Try it in three minutes](#try-it-in-three-minutes) &nbsp;|&nbsp; [Architecture](#where-aws-fits)
 
 ![Nikasi home page](docs/images/home.jpg)
 
